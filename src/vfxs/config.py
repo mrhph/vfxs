@@ -7,7 +7,9 @@ import pathlib
 from starlette.config import Config
 from starlette.datastructures import Secret
 
-config = Config('.env')
+BASE_PATH = pathlib.Path(__file__).parent.parent.parent
+
+config = Config(BASE_PATH.joinpath('.env'))
 
 IS_DEBUG = config('IS_DEBUG', cast=bool, default=False)
 DB_HOST = config('DB_HOST', default='127.0.0.1')
@@ -17,7 +19,6 @@ DB_PASSWORD = config('DB_PASSWORD', cast=Secret, default=None)
 DB_DATABASE = config('DB_DATABASE', default=None)
 DB_DRIVER = config('DB_DRIVER', default='mysql')
 
-BASE_PATH = pathlib.Path(__file__).parent.parent.parent
 DATA_DIR = BASE_PATH.joinpath('data')
 SQLITE_DB_FILE = pathlib.Path(__file__).parent.joinpath('sqlite3.db')
 
