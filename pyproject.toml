@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "sp"
+version = "0.1.0"
+description = ""
+authors = ["wenzhu <wenzhu.huang@trustbe.cn>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.103.2"
+databases = {extras = ["aiomysql", "aiosqlite"], version = "^0.8.0"}
+uvicorn = "^0.23.2"
+python-multipart = "^0.0.6"
+aiofiles = "^23.2.1"
+requests = "^2.31.0"
+pytest = "^7.4.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.plugins."vfxs.modules"]
+"v1" = "vfxs.apps.v1"
+
+[[tool.poetry.source]]
+name = "tsinghua"
+default = true
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"

@@ -1,0 +1,15 @@
+.coverage
+.coverage.*
+.cache
+.DS_Store
+__pycache__
+
+*.log
+*.out
+*.db
+*.pid
+
+.idea/
+.vscode/
+data/
+logs/
