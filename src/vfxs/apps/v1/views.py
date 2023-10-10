@@ -6,29 +6,28 @@ import os
 import time
 
 import aiofiles
-from fastapi import UploadFile, Form
-
 import sqlalchemy as sa
+from fastapi import UploadFile, Form, Request
+from starlette.datastructures import UploadFile as StarletteUploadFile
 
+from . import router
 from ...config import DATA_DIR
 from ...models.database import database
 from ...models.tables import material
-from . import router
-
 
 ASSET_EXPIRE_TIME = 3600 * 48  # 2day
 
 
 @router.post('/zone/{zone}/asset')
-async def asset_upload(zone: str, files: list[UploadFile]):
+async def asset_upload(zone: str, request: Request):
+    form = await request.form()
     values, sqls = list(), list()
-    for file in files:
+    for k, file in form.items():
+        if not isinstance(file, StarletteUploadFile):
+            continue
         path = DATA_DIR.joinpath(f'{zone}_{file.filename}')
         async with aiofiles.open(path, 'wb') as fp:
             await fp.write(await file.read())
-        # if file.filename.endswith('.mp4'):
-        #     pass
-        #     # todo 处理@西柚
         name, ft = file.filename.rsplit('.', 1)
         current_time = int(time.time() * 1000)
         record = {
@@ -36,7 +35,7 @@ async def asset_upload(zone: str, files: list[UploadFile]):
             'filename': file.filename,
             'type': 'pretreatment',
             'zone': zone,
-            'storage': {'type': 'systemFile', 'info': {'path': str(path), 'size': os.path.getsize(path)}},
+            'storage': {'type': 'systemFile', 'info': {'path': str(path), 'size': file.size}},
             'save_time': current_time,
             'expire_time': ASSET_EXPIRE_TIME,
             'create_time': current_time,
@@ -45,7 +44,8 @@ async def asset_upload(zone: str, files: list[UploadFile]):
         values.append(record)
         sqls.append(sa.insert(material).values(record))
         # await database.execute(sa.insert(material).values(record))
-    await database.execute_many(sa.insert(material), values)
+    if sqls:
+        await database.execute_many(sa.insert(material), values)
     response = [{'name': i['name'], 'size': i['storage']['info']['size']} for i in values]
     return response
 
