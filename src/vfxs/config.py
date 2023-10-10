@@ -19,6 +19,8 @@ DB_PASSWORD = config('DB_PASSWORD', cast=Secret, default=None)
 DB_DATABASE = config('DB_DATABASE', default=None)
 DB_DRIVER = config('DB_DRIVER', default='mysql')
 
+ASSET_EXPIRE_TIME = config('ASSET_EXPIRE_TIME', cast=int, default=172800)
+
 DATA_DIR = BASE_PATH.joinpath('data')
 SQLITE_DB_FILE = pathlib.Path(__file__).parent.joinpath('sqlite3.db')
 

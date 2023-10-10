@@ -3,7 +3,7 @@
 #
 # coding: utf-8
 
-def paras_content_disposition(content: str):
+def paras_form_content_disposition(content: str):
     # form-data; name="b"; filename="b.mp4"
     result = dict()
     for item in content.split(';'):
@@ -16,4 +16,4 @@ def paras_content_disposition(content: str):
 
 
 if __name__ == '__main__':
-    print(paras_content_disposition('form-data; name="b"; filename="b.mp4"'))
+    print(paras_form_content_disposition('form-data; name="b"; filename="b.mp4"'))
