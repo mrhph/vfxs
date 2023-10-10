@@ -10,6 +10,13 @@ import vfx4py
 from .base import VFXBase
 
 
+__all__ = [
+    'VFXSlowMotion',
+    'VFXFrameFreeze',
+    'VFXEnlargeFaces'
+]
+
+
 class VFXSlowMotion(VFXBase):
     def __init__(self, original: typing.Union[Path, str], output: typing.Union[Path, str]):
         super().__init__(original, output)

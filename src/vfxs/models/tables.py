@@ -26,15 +26,20 @@ material = Table(
     Column('zone', String(200), nullable=False, comment='所属景区'),
     Column('storage', JSON, nullable=False, comment='存储信息'),
     Column('save_time', BigInteger, default=current_timestamp, comment='保存时间'),
-    Column('expire_time', BigInteger, default=3600*48, comment='过期时间'),
     Column('create_time', BigInteger, default=current_timestamp, comment='创建时间'),
     Column('update_time', BigInteger, default=current_timestamp, comment='更新时间'),
+    Column('expire_time', BigInteger, default=3600 * 48, comment='过期时间'),
     Column('is_delete', Boolean, default=False, comment='是否被删除')
 )
 
 
 if __name__ == '__main__':
     import sqlalchemy as sa
+
+    # engine = sa.create_engine(
+    #     'sqlite:///./sqlite.db', connect_args={"check_same_thread": False}
+    # )
+    # metadata.create_all(engine)
 
     async def main():
         from databases import Database
