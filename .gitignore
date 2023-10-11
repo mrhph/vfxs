@@ -1,8 +1,10 @@
 .coverage
 .coverage.*
 .cache
+.env
 .DS_Store
 __pycache__
+.pytest_cache
 
 *.log
 *.out

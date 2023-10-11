@@ -4,6 +4,7 @@
 # coding: utf-8
 import json
 import time
+import uuid
 
 import aiofiles
 import sqlalchemy as sa
@@ -14,16 +15,26 @@ from vfxs.config import ASSET_EXPIRE_TIME, DATA_DIR
 from vfxs.models import database, material
 from vfxs.utils.request import paras_form_content_disposition
 from vfxs.utils.response import jsonify, error_jsonify
-# from vfxs.vfx import get_vfx_handle
+from vfxs.vfx import get_vfx_handle
 from . import router
 
 
+ASSET_DIR = DATA_DIR.joinpath('asset')
+VFX_OUT_DIR = DATA_DIR.joinpath('vfx_out')
+ASSET_DIR.mkdir(parents=True, exist_ok=True)
+VFX_OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+
 async def save_or_update_zone_asset(zone: str, file: StarletteUploadFile) -> (str, dict):
-    path = DATA_DIR.joinpath(f'asset/{zone}/{file.filename}')
+    ft = file.filename.rsplit('.', 1)[-1]  # 文件类型
+    name = paras_form_content_disposition(file.headers['content-disposition'])['name']  # name
+    path = ASSET_DIR.joinpath(f'{zone}/{name}.{ft}')
     async with aiofiles.open(path, 'wb') as fp:
         await fp.write(await file.read())
-    name = paras_form_content_disposition(file.headers['content-disposition'])['name']
-    storage = {'type': 'systemFile', 'info': {'path': str(path), 'size': file.size}}
+    storage = {
+        'type': 'systemFile',
+        'info': {'path': str(path), 'size': file.size, 'ft': ft}
+    }
     sql = sa.select(material.c.id).where(material.c.zone == zone, material.c.name == name)
     data = await database.fetch_one(sql)
     current_time = int(time.time() * 1000)
@@ -59,7 +70,6 @@ async def save_or_update_zone_asset(zone: str, file: StarletteUploadFile) -> (st
 async def asset_upload(zone: str, request: Request):
     form = await request.form()
     response = list()
-    DATA_DIR.joinpath(f'asset/{zone}').mkdir(exist_ok=True, parents=True)
     for k, file in form.items():
         if not isinstance(file, StarletteUploadFile):
             continue
@@ -92,16 +102,22 @@ async def synth_oneshot(zone: str, request: Request):
             await save_or_update_zone_asset(zone, v)
     if not rules:
         return error_jsonify(message='缺少合成规则参数rules')
+    response = list()
     for clips in rules['clips']:
         sql = sa.select(material.c.storage).where(
             material.c.zone == zone, material.c.name == clips['name']
         )
         data = await database.fetch_one(sql)
-        path = data.storage['info']['path']
-        # handle = get_vfx_handle(clips['vfx']['code'])(path, '')
-        # handle(**clips['vfx']['params'])
-        print(f'处理 {path}')
-    return jsonify({'code': 0})
+        original = data.storage['info']['path']
+        name = uuid.uuid4().hex
+        out = VFX_OUT_DIR.joinpath('%s.%s' % (name, data.storage['info']['ft']))
+        handle = get_vfx_handle(clips['vfx']['code'])(original, out)
+        handle(**clips['vfx']['params'])
+        response.append(name)
+    return jsonify(response)
+
+# @router.get('zone/{zone}/artifact/{fid}')
+# def download()
 
 
 
