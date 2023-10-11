@@ -30,7 +30,7 @@ class VFXBase:
             raise ValueError(f'{self.vfx_name}中缺少{list(diff)}入参')
 
     @abc.abstractmethod
-    def supplied_params(self, **kwargs):
+    def supplied_params(self, **kwargs) -> dict:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -38,5 +38,5 @@ class VFXBase:
         raise NotImplementedError
 
     def __call__(self, *args, **kwargs):
-        self.dispose_of(self.supplied_params(**kwargs))
+        self.dispose_of(**self.supplied_params(**kwargs))
         self.export_cos()

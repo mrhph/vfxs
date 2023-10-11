@@ -28,6 +28,7 @@ VFX_OUT_DIR.mkdir(parents=True, exist_ok=True)
 async def save_or_update_zone_asset(zone: str, file: StarletteUploadFile) -> (str, dict):
     ft = file.filename.rsplit('.', 1)[-1]  # 文件类型
     name = paras_form_content_disposition(file.headers['content-disposition'])['name']  # name
+    ASSET_DIR.joinpath(zone).mkdir(parents=True, exist_ok=True)
     path = ASSET_DIR.joinpath(f'{zone}/{name}.{ft}')
     async with aiofiles.open(path, 'wb') as fp:
         await fp.write(await file.read())
@@ -115,24 +116,3 @@ async def synth_oneshot(zone: str, request: Request):
         handle(**clips['vfx']['params'])
         response.append(name)
     return jsonify(response)
-
-# @router.get('zone/{zone}/artifact/{fid}')
-# def download()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

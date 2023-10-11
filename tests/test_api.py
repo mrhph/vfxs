@@ -6,8 +6,12 @@ import json
 import requests
 
 
+HOST = 'http://118.195.171.96:8888'
+# HOST = 'http://127.0.0.1:8000'
+
+
 def test_asset_upload():
-    url = "http://127.0.0.1:8000/v1.0/zone/aaa/asset"
+    url = f"{HOST}/v1.0/zone/aaa/asset"
     payload = {'rules': json.dumps({'a': 123})}
     files = [
         (
@@ -35,17 +39,17 @@ def test_asset_upload():
 
 
 def test_asset_list():
-    url = "http://127.0.0.1:8000/v1.0/zone/aaa/asset"
+    url = f"{HOST}/v1.0/zone/aaa/asset"
     response = requests.get(url)
     print(response.json())
 
 
 def test_synth_oneshot():
-    url = "http://127.0.0.1:8000/v1.0/zone/aaa/synth/oneshot"
+    url = f"{HOST}/v1.0/zone/aaa/synth/oneshot"
     rules = {
         "clips": [
             {
-                "name": "prelude_01",
+                "name": "test_vfx1",
                 "vfx": {
                     "code": "VFXSlowMotion",
                     "params": {"start_time": 1, "end_time": 5}
@@ -56,10 +60,10 @@ def test_synth_oneshot():
     payload = {'rules': json.dumps(rules)}
     files = [
         (
-            'prelude_01',
+            'test_vfx1',
             (
-                'prelude_01.mp4',
-                open('./data/a.mp4', 'rb'),
+                'test_vfx1.mp4',
+                open('./data/test_vfx1.mp4', 'rb'),
                 'application/octet-stream',
             )
         )

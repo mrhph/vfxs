@@ -1,7 +1,6 @@
 .coverage
 .coverage.*
 .cache
-.env
 .DS_Store
 __pycache__
 .pytest_cache
@@ -15,3 +14,4 @@ __pycache__
 .vscode/
 data/
 logs/
+.env
