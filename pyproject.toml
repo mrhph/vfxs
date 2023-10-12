@@ -12,8 +12,9 @@ databases = {extras = ["aiomysql", "aiosqlite"], version = "^0.8.0"}
 uvicorn = "^0.23.2"
 python-multipart = "^0.0.6"
 aiofiles = "^23.2.1"
-requests = "^2.31.0"
+requests = "2.27.1"
 pytest = "^7.4.2"
+cos-python-sdk-v5 = "^1.9.26"
 
 
 [build-system]

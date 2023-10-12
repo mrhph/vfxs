@@ -80,13 +80,12 @@ async def asset_upload(zone: str, request: Request):
 
 
 @router.get('/zone/{zone}/asset')
-async def get_asset(zone: str, typeof: str = 'pretreatment'):
-    print(typeof)
-    if typeof != 'pretreatment':
-        return ''
+async def get_asset(zone: str, bt: str = 'pretreatment'):
+    if bt != 'pretreatment':
+        return error_jsonify(message=f'暂不支持非{bt}类型文件查询')
     sql = sa.select(
         material.c.name, material.c.storage
-    ).where(material.c.zone == zone, material.c.type == typeof)
+    ).where(material.c.zone == zone, material.c.bt == bt)
     data = await database.fetch_all(sql)
     response = [{'name': i.name, 'size': i.storage['info']['size']} for i in data]
     return jsonify(response)

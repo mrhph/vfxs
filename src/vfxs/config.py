@@ -25,6 +25,13 @@ ASSET_EXPIRE_TIME = config('ASSET_EXPIRE_TIME', cast=int, default=172800)
 DATA_DIR = pathlib.Path(config('DATA_DIR', default=BASE_PATH.joinpath('data')))
 SQLITE_DB_FILE = pathlib.Path(__file__).parent.joinpath('sqlite3.db')
 
+# cos配置信息
+COS_SECRET_ID = config('COS_SECRET_ID', default=None)
+COS_SECRET_KEY = config('COS_SECRET_KEY', default=None)
+COS_APP_ID = config('COS_APP_ID', default=None)
+COS_REGION = config('COS_REGION', default='ap-nanjing')
+COS_BUCKET_NAME = config('COS_BUCKET_NAME', default='vfxs')
+
 
 if __name__ == '__main__':
     print(IS_DEBUG)
