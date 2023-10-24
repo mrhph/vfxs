@@ -28,7 +28,7 @@ material = Table(
     Column('save_time', BigInteger, default=current_timestamp, comment='保存时间'),
     Column('create_time', BigInteger, default=current_timestamp, comment='创建时间'),
     Column('update_time', BigInteger, default=current_timestamp, comment='更新时间'),
-    Column('expire_time', BigInteger, default=3600 * 48, comment='过期时间'),
+    Column('expire_time', BigInteger, default=0, comment='过期时间'),
     Column('is_delete', Boolean, default=False, comment='是否被删除')
 )
 

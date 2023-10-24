@@ -19,7 +19,7 @@ DB_USER = config('DB_USER', default=None)
 DB_PASSWORD = config('DB_PASSWORD', cast=Secret, default=None)
 DB_DATABASE = config('DB_DATABASE', default=None)
 DB_DRIVER = config('DB_DRIVER', default='mysql')
-ASSET_EXPIRE_TIME = config('ASSET_EXPIRE_TIME', cast=int, default=172800)
+ASSET_EXPIRE_TIME = config('ASSET_EXPIRE_TIME_SECOND', cast=int, default=172800)
 
 # 路径信息
 DATA_DIR = pathlib.Path(config('DATA_DIR', default=BASE_PATH.joinpath('data')))

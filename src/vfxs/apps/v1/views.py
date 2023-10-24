@@ -45,6 +45,7 @@ async def save_or_update_zone_asset(zone: str, file: StarletteUploadFile) -> (st
             'storage': storage,
             'save_time': current_time,
             'update_time': current_time,
+            'expire_time': current_time + ASSET_EXPIRE_TIME,
             'is_delete': False
         }
         sql = sa.update(material).where(material.c.id == data.id).values(record)
@@ -60,7 +61,7 @@ async def save_or_update_zone_asset(zone: str, file: StarletteUploadFile) -> (st
             'save_time': current_time,
             'create_time': current_time,
             'update_time': current_time,
-            'expire_time': ASSET_EXPIRE_TIME,
+            'expire_time': current_time + ASSET_EXPIRE_TIME,
             'is_delete': False,
         }
         await database.execute(sa.insert(material).values(record))
