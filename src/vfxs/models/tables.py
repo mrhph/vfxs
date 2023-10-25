@@ -8,8 +8,6 @@ from sqlalchemy import Table, Column, Integer, String, JSON, BigInteger, Boolean
 
 from .database import metadata
 
-# metadata = MetaData()
-
 
 def current_timestamp() -> int:
     return int(time.time() * 1000)
@@ -31,29 +29,3 @@ material = Table(
     Column('expire_time', BigInteger, default=0, comment='过期时间'),
     Column('is_delete', Boolean, default=False, comment='是否被删除')
 )
-
-
-if __name__ == '__main__':
-    import sqlalchemy as sa
-
-    # engine = sa.create_engine(
-    #     'sqlite:///./sqlite.db', connect_args={"check_same_thread": False}
-    # )
-    # metadata.create_all(engine)
-
-    async def main():
-        from databases import Database
-        db = Database("sqlite:///./sql_app.db")
-        await db.connect()
-        # query = sa.insert(material)
-        # values = [
-        #     dict(name='ttt3', filename='ttt.mp3', type='mp3', zone='z', save_info={}),
-        #     dict(name='ttt4', filename='ttt.mp3', type='mp3', zone='z', save_info={})
-        # ]
-        # print(await db.execute_many(query, values))
-        query = sa.select(material.c.storage).where(material.c.name == 'ttt3')
-        obj = await db.fetch_one(query)
-        print(obj.storage)
-
-    import asyncio
-    asyncio.run(main())

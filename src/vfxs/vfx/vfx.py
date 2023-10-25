@@ -41,11 +41,11 @@ class VFXFrameFreeze(VFXBase):
         self.model = vfx4py.VFXFrameFreeze()
 
     def supplied_params(self, **kwargs):
-        params = ['photo_frm', 'photo_frm_mask', 'begin_sec']
+        params = ['begin_sec']
         self.check_params(params, kwargs)
         return {
-            'photo_frm': kwargs['photo_frm'],
-            'photo_frm_mask': kwargs['photo_frm_mask'],
+            'photo_frm': '待提供',
+            'photo_frm_mask': '待提供',
             'begin_sec': kwargs['begin_sec'],
             'scale': kwargs.get('scale', 0.8)
         }

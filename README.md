@@ -135,7 +135,7 @@ Content-Type: application/json
       "name": "camera_01",
       "vfx": {
         "code": "VFXFrameFreeze",
-        "params": {"photo_frm":  "x1.png", "photo_frm_mask":  "x2.jpg", "begin_sec": 1}
+        "params": {"begin_sec": 1}
       }
     }
   ],
@@ -155,7 +155,7 @@ Content-Type: application/octet-stream
 camera_01视频数据...
 ```
 
-### 响应
+**响应**
 ```text
 {
     "url": "/1.0/zone/aly/artifact/xxxxx" //下载URI，默认合成结果保留24小时（具体以实际配置为准）
@@ -163,42 +163,7 @@ camera_01视频数据...
 ```
 
 ### 异步合成
-异步合成接口，提交数据并返回任务ID，后续可通过任务状态查询接口获取任务状态。
-```text
-POST /1.0/zone/{ZONE}/synth/task
-```
-请求内容与`同步`接口一致，具体参考 `/1.0/zone/{ZONE}/synth/oneshot`
-
-**响应**
-```text
-{
-    "task_id": "xxxxxxxxx" //合成任务ID
-}
-```
-
-### 任务状态
-查询指定任务状态。
-```text
-GET /1.0/zone/{ZONE}/synth/task/{TASK_ID}
-```
-**响应**
-```text
-{
-    "task_id": "xxxxxxxxx", //合成任务ID
-    "status": 0, // 任务状态 0 - 待合成，1 - 合成中，2 - 合成成功, 3 - 合成失败
-    "url": "/1.0/zone/aly/artifact/xxxxx", //下载URI，仅当合成成功时有效，默认合成结果保留24小时（具体以实际配置为准）
-    "create_time": 1689562043, //任务创建时间，UTC时间戳
-    "start_time": 1689562048, //任务开始时间，UTC时间戳
-    "finish_time": 1689562050 //任务结束时间（成功或失败），UTC时间戳，仅当合成完成（成功或失败）时有效
-}
-```
-
-### 结果下载
-下载合成文件
-```text
-GET /1.0/zone/{ZONE}/artifact/{ID}
-```
-合成文件数据内容
+待开发
 
 ## 特效规则
 特效在在合成接口中的rules中指定，每一个视频需要绑定一个特效vfx。
@@ -216,12 +181,15 @@ GET /1.0/zone/{ZONE}/artifact/{ID}
 每个特效具体的code及参数如下
 
 **画框定格（VFXFrameFreeze）**
-* photo_frm：相框路径
-* photo_frm_mask：相框mask路径
-* begin_sec：特效开始时间
-* scale：相框缩放0～1，可不传，默认0.8
+
+| 参数 | 类型     | 必选 | 默认值 | 说明 |
+| -- |--------|----|-----| -- |
+| begin_sec | int    | 是  | 无   | 特效开始时间 |
+| scale | float  | 否  | 0.8 | 相框缩放0～1 |
 
 **视频慢放（VFXSlowMotion）**
-* start_time：慢放开始时间
-* end_time：慢放结束时间
 
+| 参数 | 类型  | 必选 | 默认值 | 说明 |
+| -- |-----|----|-----| -- |
+| start_time | int | 是  | 无   | 慢放开始时间 |
+| end_time | int | 是  | 无   | 慢放结束时间 |
