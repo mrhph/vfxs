@@ -44,31 +44,210 @@ def test_asset_list():
     print(response.json())
 
 
-def test_synth_oneshot():
+def synth_oneshot(rules):
     url = f"{HOST}/v1.0/zone/aaa/synth/oneshot"
-    rules = {
-        "clips": [
-            {
-                "name": "test_vfx1",
-                "vfx": {
-                    "code": "VFXSlowMotion",
-                    "params": {"start_time": 1, "end_time": 5}
-                }
-            },
-        ]
-    }
     payload = {'rules': json.dumps(rules)}
     files = [
         (
-            'test_vfx1',
+            'test_1',
             (
-                'test_vfx1.mp4',
-                open('./data/test_vfx1.mp4', 'rb'),
+                'test_1.mp4',
+                open('./data/test_1.mp4', 'rb'),
+                'application/octet-stream',
+            )
+        ),
+        (
+            'mainchar',
+            (
+                'mainchar.jpg',
+                open('./data/mainchar.jpg', 'rb'),
+                'application/octet-stream',
+            )
+        ),
+        (
+            'bgm',
+            (
+                'bgm.aac',
+                open('./data/bgm.aac', 'rb'),
                 'application/octet-stream',
             )
         )
     ]
     headers = {}
     response = requests.post(url, headers=headers, data=payload, files=files)
-    print(response.status_code)
     print(response.text)
+
+
+def test_frame_freeze():
+    """画框定格"""
+    rules = {
+        "clips": [
+            {
+                "name": "test_1",
+                "vfx": {
+                    "code": "VFXFrameFreeze",
+                    "params": {"begin_sec": 1}
+                }
+            }
+        ]
+    }
+    synth_oneshot(rules)
+
+
+def test_slow_motion():
+    """慢动作"""
+    rules = {
+        "clips": [
+            {
+                "name": "test_1",
+                "vfx": {
+                    "code": "VFXSlowMotion",
+                    "params": {"begin_sec": 1, "end_sec": 5}
+                }
+            }
+        ]
+    }
+    synth_oneshot(rules)
+
+
+def test_viewfinder_slow_action():
+    """取景框慢动作"""
+    rules = {
+        "clips": [
+            {
+                "name": "test_1",
+                "vfx": {
+                    "code": "VFXViewfinderSlowAction",
+                    "params": {"begin_sec": 1, "end_sec": 5}
+                }
+            },
+        ]
+    }
+    synth_oneshot(rules)
+
+
+def test_rgb_shake():
+    """RGB震动"""
+    rules = {
+        "clips": [
+            {
+                "name": "test_1",
+                "vfx": {
+                    "code": "VFXRGBShake",
+                    "params": {"begin_sec": 1, "end_sec": 5}
+                }
+            },
+        ]
+    }
+    synth_oneshot(rules)
+
+
+def test_xmv_cover():
+    """MV封面"""
+    rules = {
+        "clips": [
+            {
+                "name": "test_1",
+                "vfx": {
+                    "code": "VFXMVCover",
+                    "params": {"begin_sec": 1}
+                }
+            },
+        ]
+    }
+    synth_oneshot(rules)
+
+
+def test_enlarge_faces():
+    """C位放大镜"""
+    rules = {
+        "clips": [
+            {
+                "name": "test_1",
+                "vfx": {
+                    "code": "VFXEnlargeFaces",
+                    "params": {"main_char": 'mainchar'}
+                }
+            },
+        ]
+    }
+    synth_oneshot(rules)
+
+
+def test_passersby_blurred():
+    """路人虚化"""
+    rules = {
+        "clips": [
+            {
+                "name": "test_1",
+                "vfx": {
+                    "code": "VFXPassersbyBlurred",
+                    "params": {"main_char": 'mainchar'}
+                }
+            },
+        ]
+    }
+    synth_oneshot(rules)
+
+
+def test_person_follow_focus():
+    """变焦"""
+    rules = {
+        "clips": [
+            {
+                "name": "test_1",
+                "vfx": {
+                    "code": "VFXPersonFollowFocus",
+                    "params": {"main_char": 'mainchar'}
+                }
+            },
+        ]
+    }
+    synth_oneshot(rules)
+
+
+def test_all_video():
+    rules = {
+        "clips": [
+            {
+                "name": "test_1",
+                "vfx": {
+                    "code": "VFXFrameFreeze",
+                    "params": {"begin_sec": 1}
+                }
+            },
+            {
+                "name": "test_1",
+                "vfx": {
+                    "code": "VFXEnlargeFaces",
+                    "params": {"main_char": 'mainchar'}
+                }
+            },
+        ]
+    }
+    synth_oneshot(rules)
+
+
+def test_all_video_with_music():
+    rules = {
+        "clips": [
+            {
+                "name": "test_1",
+                "vfx": {
+                    "code": "VFXFrameFreeze",
+                    "params": {"begin_sec": 1}
+                }
+            },
+            {
+                "name": "test_1",
+                "vfx": {
+                    "code": "VFXEnlargeFaces",
+                    "params": {"main_char": 'mainchar'}
+                }
+            },
+        ],
+        'music': {
+            "name": "bgm"
+        }
+    }
+    synth_oneshot(rules)

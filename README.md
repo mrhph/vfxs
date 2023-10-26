@@ -164,7 +164,10 @@ music_1音频数据...
 **响应**
 ```text
 {
-    "url": "/1.0/zone/aly/artifact/xxxxx" //下载URI，默认合成结果保留24小时（具体以实际配置为准）
+  "cos": {
+    "bucket": "vfxs-test-1318254791",
+    "key": "1b8dcdb71d8e4818b3190d9669cde670.mp4"
+  }
 }
 ```
 
@@ -191,7 +194,6 @@ music_1音频数据...
 | 参数 | 类型     | 必选 | 默认值 | 说明 |
 | -- |--------|----|-----| -- |
 | begin_sec | int    | 是  | 无   | 特效开始时间 |
-| scale | float  | 否  | 0.8 | 相框缩放0～1 |
 
 **慢动作（VFXSlowMotion）**
 
@@ -214,36 +216,27 @@ music_1音频数据...
 | -- |-----|----|-----| -- |
 | begin_sec | int | 是  | 无   | 慢放开始时间 |
 | end_sec | int | 是  | 无   | 慢放结束时间 |
-| max_magnifications | 数组  | 是  | 无   | 震动比例 |
-| shake_time | int | 是  | 无   | 震动帧数 |
 
 **C位放大镜（VFXEnlargeFaces）**
 
 | 参数 | 类型    | 必选 | 默认值 | 说明     |
 | -- |-------|----|-----|--------|
 | main_char | str   | 是  | 无   | 主角人脸图片 |
-| scale | float | 是  | 无   |  |
-| cosine_similar_thresh | float | 否  | 0.2 |  人脸对比阈值  |
 
 **路人虚化（VFXPassersbyBlurred）**
 
 | 参数 | 类型    | 必选 | 默认值 | 说明     |
 | -- |-------|----|-----|--------|
 | main_char | str   | 是  | 无   | 主角人脸图片 |
-| scale | float | 是  | 无   |  |
-| cosine_similar_thresh | float | 否  | 0.2 | 人脸对比阈值   |
 
 **变焦（VFXPersonFollowFocus）**
 
 | 参数 | 类型    | 必选 | 默认值 | 说明     |
 | -- |-------|----|-----|--------|
 | main_char | str   | 是  | 无   | 主角人脸图片 |
-| scale | float | 是  | 无   |  |
-| cosine_similar_thresh | float | 否  | 0.2 |  人脸对比阈值  |
 
 **MV封面（VFXMVCover）**
 
 | 参数 | 类型     | 必选 | 默认值 | 说明 |
 | -- |--------|----|-----| -- |
 | begin_sec | int    | 是  | 无   | 特效开始时间 |
-| scale | float  | 否  | 0.8 | 相框缩放0～1 |

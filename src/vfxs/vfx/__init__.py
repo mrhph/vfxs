@@ -7,9 +7,14 @@ from .base import VFXBase
 from .vfx import *
 
 VFX_MAP = {
-    'VFXSlowMotion': VFXSlowMotion,
     'VFXFrameFreeze': VFXFrameFreeze,
-    'VFXEnlargeFaces': VFXEnlargeFaces
+    'VFXSlowMotion': VFXSlowMotion,
+    'VFXViewfinderSlowAction': VFXViewfinderSlowAction,
+    'VFXRGBShake': VFXRGBShake,
+    'VFXEnlargeFaces': VFXEnlargeFaces,
+    'VFXPassersbyBlurred': VFXPassersbyBlurred,
+    'VFXPersonFollowFocus': VFXPersonFollowFocus,
+    'VFXMVCover': VFXMVCover
 }
 
 

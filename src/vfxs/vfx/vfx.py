@@ -18,6 +18,7 @@ __all__ = [
     'VFXEnlargeFaces',
     'VFXPassersbyBlurred',
     'VFXPersonFollowFocus',
+    'VFXMVCover',
     'concat_videos',
     'add_music_to_video'
 ]
@@ -44,9 +45,8 @@ class VFXFrameFreeze(VFXBase):
         }
 
     def dispose_of(self, photo_frm: str, photo_frm_mask: str, begin_sec: int, scale: float, *args, **kwargs):
-        skip_rate = 1
         model = vfx4py.VFXFrameFreeze(photo_frm, photo_frm_mask, scale)
-        model.handle_video(self.input, self.output, begin_sec, skip_rate)
+        model.handle_video(self.input, self.output, begin_sec)
 
 
 class VFXSlowMotion(VFXBase):
@@ -93,14 +93,14 @@ class VFXRGBShake(VFXBase):
         self.vfx_name = 'RGB震动'
 
     def supplied_params(self, **kwargs) -> dict:
-        # int, int, list[float], int
-        params = ['begin_sec', 'end_sec', 'max_magnifications', 'shake_time']
+        # int, int
+        params = ['begin_sec', 'end_sec']
         self.check_params(params, kwargs)
         return {
             'begin_sec': kwargs['begin_sec'],
             'end_sec': kwargs['end_sec'],
-            'max_magnifications': kwargs['max_magnifications'],
-            'shake_time': kwargs['shake_time']
+            'max_magnifications': [0.1, 0.2, 0.3],
+            'shake_time': 15
         }
 
     def dispose_of(
@@ -114,57 +114,61 @@ class VFXRGBShake(VFXBase):
 
 class VFXWithModel(VFXBase):
     """VFXEnlargeFaces, VFXPassersbyBlurred, VFXPersonFollowFocus基类"""
-    def __init__(self, original: typing.Union[Path, str], output: typing.Union[Path, str]):
-        super().__init__(original, output)
-        self.model_cls: typing.Optional[typing.ClassVar] = None
-        self.scale: typing.Optional[float] = None
+
+    PRE_MODEL = None
 
     def supplied_params(self, **kwargs) -> dict:
-        # str, float, float, str
-        params = ['main_char', 'scale', 'cosine_similar_thresh']
+        # str
+        params = ['main_char']
         self.check_params(params, kwargs)
         return {
-            'fd_model': str(VFX_RES_DIR.joinpath('VFXWithModel/FaceDetect.wts')),       # 人脸检测模型路径
-            'fr_model': str(VFX_RES_DIR.joinpath('VFXWithModel/FaceRecognition.wts')),  # 人脸识别模型路径
-            'scale': self.scale,
-            'cosine_similar_thresh': kwargs['cosine_similar_thresh'],
-            'main_char': kwargs['main_char']   # 主角人脸图片
+            'main_char': kwargs['main_char'],  # 主角人脸图片
         }
 
-    def dispose_of(
-            self,
-            fd_model: str, fr_model: str, main_char: str, scale: float, cosine_similar_thresh: float,
-            *args, **kwargs
-    ):
-        model = self.model_cls(fd_model, fr_model, scale, cosine_similar_thresh)
-        model.handle_video(self.input, self.output, main_char)
+    def dispose_of(self, main_char: str, *args, **kwargs):
+        self.PRE_MODEL.handle_video(self.input, self.output, main_char)
 
 
 class VFXEnlargeFaces(VFXWithModel):
+
+    PRE_MODEL = vfx4py.VFXEnlargeFaces(
+        str(VFX_RES_DIR.joinpath('VFXWithModel/FaceDetect.wts')),
+        str(VFX_RES_DIR.joinpath('VFXWithModel/FaceRecognition.wts')),
+        0.2, 1.005
+    )
+
     def __init__(self, original: typing.Union[Path, str], output: typing.Union[Path, str]):
         super().__init__(original, output)
         self.vfx_code = 'VFXEnlargeFaces'
         self.vfx_name = 'C位放大镜'
-        self.model_cls = vfx4py.VFXEnlargeFaces
-        self.scale = 1.005
 
 
 class VFXPassersbyBlurred(VFXWithModel):
+
+    PRE_MODEL = vfx4py.VFXPassersbyBlurred(
+        str(VFX_RES_DIR.joinpath('VFXWithModel/FaceDetect.wts')),
+        str(VFX_RES_DIR.joinpath('VFXWithModel/FaceRecognition.wts')),
+        0.2, 1.1
+    )
+
     def __init__(self, original: typing.Union[Path, str], output: typing.Union[Path, str]):
         super().__init__(original, output)
         self.vfx_code = 'VFXPassersbyBlurred'
         self.vfx_name = '路人虚化'
-        self.model_cls = vfx4py.VFXPassersbyBlurred
-        self.scale = 1.1
 
 
 class VFXPersonFollowFocus(VFXWithModel):
+
+    PRE_MODEL = vfx4py.VFXPersonFollowFocus(
+        str(VFX_RES_DIR.joinpath('VFXWithModel/FaceDetect.wts')),
+        str(VFX_RES_DIR.joinpath('VFXWithModel/FaceRecognition.wts')),
+        0.2, 1.005
+    )
+
     def __init__(self, original: typing.Union[Path, str], output: typing.Union[Path, str]):
         super().__init__(original, output)
         self.vfx_code = 'VFXPersonFollowFocus'
         self.vfx_name = '变焦'
-        self.model_cls = vfx4py.VFXPersonFollowFocus
-        self.scale = 1.005
 
 
 class VFXMVCover(VFXBase):

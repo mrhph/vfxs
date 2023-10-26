@@ -11,10 +11,11 @@ import sqlalchemy as sa
 from fastapi import Request
 from starlette.datastructures import UploadFile as StarletteUploadFile
 
-from vfxs.config import ASSET_EXPIRE_TIME, DATA_DIR
+from vfxs.config import ASSET_EXPIRE_TIME, DATA_DIR, COS_BUCKET_NAME
 from vfxs.models import database, material
 from vfxs.utils.request import paras_form_content_disposition
 from vfxs.utils.response import jsonify, error_jsonify
+from vfxs.utils.cos import CosStorage
 from vfxs.vfx import get_vfx_handle, concat_videos, add_music_to_video
 from . import router
 
@@ -92,6 +93,14 @@ async def get_asset(zone: str, bt: str = 'pretreatment'):
     return jsonify(response)
 
 
+async def get_storage_path(zone: str, name: str) -> str:
+    sql = sa.select(material.c.storage).where(
+        material.c.zone == zone, material.c.name == name
+    )
+    data = await database.fetch_one(sql)
+    return data.storage['info']['path']
+
+
 @router.post('/zone/{zone}/synth/oneshot')
 async def synth_oneshot(zone: str, request: Request):
     form = await request.form()
@@ -104,30 +113,31 @@ async def synth_oneshot(zone: str, request: Request):
     if not rules:
         return error_jsonify(message='缺少合成规则参数rules')
     videos = list()
-    for clips in rules['clips']:
-        sql = sa.select(material.c.storage).where(
-            material.c.zone == zone, material.c.name == clips['name']
-        )
-        data = await database.fetch_one(sql)
-        original = data.storage['info']['path']
-        out = VFX_OUT_DIR.joinpath('%s.%s' % (uuid.uuid4().hex, data.storage['info']['ft']))
-        handle = get_vfx_handle(clips['vfx']['code'])(original, out)
-        handle(**clips['vfx']['params'])
-        videos.append(out)
+    for clip in rules['clips']:
+        if clip['vfx']['code'] in ['VFXEnlargeFaces', 'VFXPassersbyBlurred', 'VFXPersonFollowFocus']:
+            clip['vfx']['params']['main_char'] = await get_storage_path(zone, clip['vfx']['params']['main_char'])
+        ori_path = await get_storage_path(zone, clip['name'])
+        out_path = VFX_OUT_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
+        handle = get_vfx_handle(clip['vfx']['code'])(ori_path, out_path)
+        handle(**clip['vfx']['params'])
+        videos.append(str(out_path))
     if len(videos) == 1:
         video = videos[0]
     else:
-        video = VFX_OUT_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
-        concat_videos(str(video), *videos)
+        video = str(VFX_OUT_DIR.joinpath(f'{uuid.uuid4().hex}.mp4'))
+        concat_videos(video, *videos)
     if rules.get('music'):
-        sql = sa.select(material.c.storage).where(
-            material.c.zone == zone, material.c.name == rules['music']['name']
-        )
-        data = await database.fetch_one(sql)
-        music = data.storage['info']['path']
-        result = VFX_OUT_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
-        add_music_to_video(str(result), str(video), music)
+        music = await get_storage_path(zone, rules['music']['name'])
+        result = str(VFX_OUT_DIR.joinpath(f'{uuid.uuid4().hex}.mp4'))
+        add_music_to_video(result, video, music)
     else:
         result = video
 
-    return jsonify(str(result))
+    cos_key = uuid.uuid4().hex + '.mp4'
+    CosStorage.upload_file(result, cos_key)
+
+    response = {
+        'cos': {'bucket': COS_BUCKET_NAME, 'key': cos_key},
+        'path': result
+    }
+    return jsonify(response)
