@@ -15,7 +15,7 @@ from vfxs.config import ASSET_EXPIRE_TIME, DATA_DIR
 from vfxs.models import database, material
 from vfxs.utils.request import paras_form_content_disposition
 from vfxs.utils.response import jsonify, error_jsonify
-from vfxs.vfx import get_vfx_handle
+from vfxs.vfx import get_vfx_handle, concat_videos, add_music_to_video
 from . import router
 
 
@@ -103,16 +103,31 @@ async def synth_oneshot(zone: str, request: Request):
             await save_or_update_zone_asset(zone, v)
     if not rules:
         return error_jsonify(message='缺少合成规则参数rules')
-    response = list()
+    videos = list()
     for clips in rules['clips']:
         sql = sa.select(material.c.storage).where(
             material.c.zone == zone, material.c.name == clips['name']
         )
         data = await database.fetch_one(sql)
         original = data.storage['info']['path']
-        name = uuid.uuid4().hex
-        out = VFX_OUT_DIR.joinpath('%s.%s' % (name, data.storage['info']['ft']))
+        out = VFX_OUT_DIR.joinpath('%s.%s' % (uuid.uuid4().hex, data.storage['info']['ft']))
         handle = get_vfx_handle(clips['vfx']['code'])(original, out)
         handle(**clips['vfx']['params'])
-        response.append(name)
-    return jsonify(response)
+        videos.append(out)
+    if len(videos) == 1:
+        video = videos[0]
+    else:
+        video = VFX_OUT_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
+        concat_videos(str(video), *videos)
+    if rules.get('music'):
+        sql = sa.select(material.c.storage).where(
+            material.c.zone == zone, material.c.name == rules['music']['name']
+        )
+        data = await database.fetch_one(sql)
+        music = data.storage['info']['path']
+        result = VFX_OUT_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
+        add_music_to_video(str(result), str(video), music)
+    else:
+        result = video
+
+    return jsonify(str(result))

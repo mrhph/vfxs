@@ -125,14 +125,14 @@ Content-Type: application/json
 {
   "clips": [
     {
-      "name": "prelude_01",
+      "name": "video_1",
       "vfx": {
         "code": "VFXSlowMotion",
         "params": {"start_time":  1, "end_time":  5}
       }
     },
     {
-      "name": "camera_01",
+      "name": "video_2",
       "vfx": {
         "code": "VFXFrameFreeze",
         "params": {"begin_sec": 1}
@@ -140,19 +140,25 @@ Content-Type: application/json
     }
   ],
   "music": {
-    "name": "bgm_01"
+    "name": "music_1"
   }
 }
 --${Boundary}
-Content-Disposition: form-data; name="prelude_01"; filename="preclude_01.mp4"
+Content-Disposition: form-data; name="video_1"; filename="video_1.mp4"
 Content-Type: application/octet-stream
 
-preclude_01视频数据...
+video_1视频数据...
 --${Boundary}
-Content-Disposition: form-data; name="camera_01"; filename="camera_01.mp4"
+Content-Disposition: form-data; name="video_2"; filename="video_2.mp4"
 Content-Type: application/octet-stream
 
-camera_01视频数据...
+video_2视频数据...
+--${Boundary}
+Content-Disposition: form-data; name="music_1"; filename="music_1.mp3"
+Content-Type: application/octet-stream
+
+music_1音频数据...
+--${Boundary}
 ```
 
 **响应**
@@ -187,9 +193,57 @@ camera_01视频数据...
 | begin_sec | int    | 是  | 无   | 特效开始时间 |
 | scale | float  | 否  | 0.8 | 相框缩放0～1 |
 
-**视频慢放（VFXSlowMotion）**
+**慢动作（VFXSlowMotion）**
 
 | 参数 | 类型  | 必选 | 默认值 | 说明 |
 | -- |-----|----|-----| -- |
-| start_time | int | 是  | 无   | 慢放开始时间 |
-| end_time | int | 是  | 无   | 慢放结束时间 |
+| begin_sec | int | 是  | 无   | 慢放开始时间 |
+| end_sec | int | 是  | 无   | 慢放结束时间 |
+
+**取景框慢动作（VFXViewfinderSlowAction）**
+
+| 参数 | 类型  | 必选 | 默认值 | 说明 |
+| -- |-----|----|-----| -- |
+| begin_sec | int | 是  | 无   | 慢放开始时间 |
+| end_sec | int | 是  | 无   | 慢放结束时间 |
+
+
+**RGB震动（VFXRGBShake）**
+
+| 参数 | 类型  | 必选 | 默认值 | 说明 |
+| -- |-----|----|-----| -- |
+| begin_sec | int | 是  | 无   | 慢放开始时间 |
+| end_sec | int | 是  | 无   | 慢放结束时间 |
+| max_magnifications | 数组  | 是  | 无   | 震动比例 |
+| shake_time | int | 是  | 无   | 震动帧数 |
+
+**C位放大镜（VFXEnlargeFaces）**
+
+| 参数 | 类型    | 必选 | 默认值 | 说明     |
+| -- |-------|----|-----|--------|
+| main_char | str   | 是  | 无   | 主角人脸图片 |
+| scale | float | 是  | 无   |  |
+| cosine_similar_thresh | float | 否  | 0.2 |  人脸对比阈值  |
+
+**路人虚化（VFXPassersbyBlurred）**
+
+| 参数 | 类型    | 必选 | 默认值 | 说明     |
+| -- |-------|----|-----|--------|
+| main_char | str   | 是  | 无   | 主角人脸图片 |
+| scale | float | 是  | 无   |  |
+| cosine_similar_thresh | float | 否  | 0.2 | 人脸对比阈值   |
+
+**变焦（VFXPersonFollowFocus）**
+
+| 参数 | 类型    | 必选 | 默认值 | 说明     |
+| -- |-------|----|-----|--------|
+| main_char | str   | 是  | 无   | 主角人脸图片 |
+| scale | float | 是  | 无   |  |
+| cosine_similar_thresh | float | 否  | 0.2 |  人脸对比阈值  |
+
+**MV封面（VFXMVCover）**
+
+| 参数 | 类型     | 必选 | 默认值 | 说明 |
+| -- |--------|----|-----| -- |
+| begin_sec | int    | 是  | 无   | 特效开始时间 |
+| scale | float  | 否  | 0.8 | 相框缩放0～1 |
