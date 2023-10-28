@@ -10,15 +10,16 @@
 
 本文档描述了合成服务的HTTP接口。响应状态以status_code为判断依据，成功为200，失败为400/404/500等。
 响应结果在非文件的情况下均为json格式，`Content-Type: application/json`。
-如出现请求失败，失败信息会以如下形式返回：
 
 ```text
 {
   "code": 10000,
-  "message": "错误信息"
+  "message": "成功或者错误信息",
+  "data": {},  // 响应结果
 }
 ```
-错误码枚举如下
+状态码枚举如下
+* 0     请求成功
 * 10000	参数错误
 * 10001	合成失败
 * 10002	任务提交失败
@@ -57,20 +58,24 @@ camera_01视频数据...
 
 **响应**
 ```text
-[
-  {
-    "name": "epilog_01", //唯一标识，与上传时的 name 对应，合成规则中指向此名。
-    "size": 9956701 //文件大小
-  },
-  {
-    "name": "bgm_01",
-    "size": 781988
-  },
-  {
-    "name": "prelude_01",
-    "size": 6249432
-  }
-]
+{
+  "code": 0,
+  "message": "success",
+  "data": [
+    {
+      "name": "epilog_01", //唯一标识，与上传时的 name 对应，合成规则中指向此名。
+      "size": 9956701 //文件大小
+    },
+    {
+      "name": "bgm_01",
+      "size": 781988
+    },
+    {
+      "name": "prelude_01",
+      "size": 6249432
+    }
+  ]
+}
 ```
 
 ### 文件列表
@@ -82,16 +87,20 @@ GET /1.0/zone/{ZONE}/asset
 
 **响应**
 ```text
-[
-  {
-    "name": "epilog_01", 
-    "size": 9956701
-  },
-  {
-    "name": "bgm_01",
-    "size": 781988
-  }
-]
+{
+  "code": 0,
+  "message": "success",
+  "data": [
+    {
+      "name": "epilog_01",
+      "size": 9956701
+    },
+    {
+      "name": "bgm_01",
+      "size": 781988
+    }
+  ]
+}
 ```
 
 ### 同步合成
@@ -164,9 +173,13 @@ music_1音频数据...
 **响应**
 ```text
 {
-  "cos": {
-    "bucket": "vfxs-test-1318254791",
-    "key": "1b8dcdb71d8e4818b3190d9669cde670.mp4"
+  "code": 0,
+  "message": "success",
+  "data": {
+    "cos": {
+      "bucket": "vfxs-test-1318254791",
+      "key": "1b8dcdb71d8e4818b3190d9669cde670.mp4"
+    }
   }
 }
 ```
@@ -200,14 +213,12 @@ music_1音频数据...
 | 参数 | 类型  | 必选 | 默认值 | 说明 |
 | -- |-----|----|-----| -- |
 | begin_sec | int | 是  | 无   | 慢放开始时间 |
-| end_sec | int | 是  | 无   | 慢放结束时间 |
 
 **取景框慢动作（VFXViewfinderSlowAction）**
 
 | 参数 | 类型  | 必选 | 默认值 | 说明 |
 | -- |-----|----|-----| -- |
 | begin_sec | int | 是  | 无   | 慢放开始时间 |
-| end_sec | int | 是  | 无   | 慢放结束时间 |
 
 
 **RGB震动（VFXRGBShake）**
@@ -215,7 +226,6 @@ music_1音频数据...
 | 参数 | 类型  | 必选 | 默认值 | 说明 |
 | -- |-----|----|-----| -- |
 | begin_sec | int | 是  | 无   | 慢放开始时间 |
-| end_sec | int | 是  | 无   | 慢放结束时间 |
 
 **C位放大镜（VFXEnlargeFaces）**
 
