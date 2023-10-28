@@ -16,7 +16,7 @@ from vfxs.models import database, material
 from vfxs.utils.request import paras_form_content_disposition
 from vfxs.utils.response import response_200, response_400
 from vfxs.utils.cos import CosStorage
-# from vfxs.vfx import get_vfx_handle, concat_videos, add_music_to_video
+from vfxs.vfx import get_vfx_handle, concat_videos, add_music_to_video
 from . import router
 
 

@@ -56,13 +56,13 @@ class VFXSlowMotion(VFXBase):
         self.vfx_name = '慢动作'
 
     def supplied_params(self, **kwargs):
-        params = ['begin_sec', 'end_sec']
+        params = ['begin_sec']
         self.check_params(params, kwargs)
-        return {'begin_sec': kwargs['begin_sec'], 'end_sec': kwargs['end_sec']}
+        return {'begin_sec': kwargs['begin_sec']}
 
-    def dispose_of(self, begin_sec: int, end_sec: int, *args, **kwargs):
+    def dispose_of(self, begin_sec: int, *args, **kwargs):
         model = vfx4py.VFXSlowMotion()
-        model.handle_video(self.input, self.output, begin_sec, end_sec)
+        model.handle_video(self.input, self.output, begin_sec)
 
 
 class VFXViewfinderSlowAction(VFXBase):
@@ -73,17 +73,16 @@ class VFXViewfinderSlowAction(VFXBase):
 
     def supplied_params(self, **kwargs):
         # int, int
-        params = ['begin_sec', 'end_sec']
+        params = ['begin_sec']
         self.check_params(params, kwargs)
         return {
             'viewfinder_video_path': str(VFX_RES_DIR.joinpath(f'{self.vfx_code}/viewfinder.mp4')),
-            'begin_sec': kwargs['begin_sec'],
-            'end_sec': kwargs['end_sec'],
+            'begin_sec': kwargs['begin_sec']
         }
 
-    def dispose_of(self, viewfinder_video_path: str, begin_sec: int, end_sec: int, *args, **kwargs):
+    def dispose_of(self, viewfinder_video_path: str, begin_sec: int, *args, **kwargs):
         model = vfx4py.VFXViewfinderSlowAction()
-        model.handle_video(self.input, viewfinder_video_path, self.output, begin_sec, end_sec)
+        model.handle_video(self.input, viewfinder_video_path, self.output, begin_sec)
 
 
 class VFXRGBShake(VFXBase):
@@ -94,22 +93,21 @@ class VFXRGBShake(VFXBase):
 
     def supplied_params(self, **kwargs) -> dict:
         # int, int
-        params = ['begin_sec', 'end_sec']
+        params = ['begin_sec']
         self.check_params(params, kwargs)
         return {
             'begin_sec': kwargs['begin_sec'],
-            'end_sec': kwargs['end_sec'],
             'max_magnifications': [0.1, 0.2, 0.3],
             'shake_time': 15
         }
 
     def dispose_of(
             self,
-            max_magnifications: list[float], shake_time: int, begin_sec: int, end_sec: int,
+            max_magnifications: list[float], shake_time: int, begin_sec: int,
             *args, **kwargs
     ):
         model = vfx4py.VFXRGBShake(max_magnifications[0], max_magnifications[1], max_magnifications[2], shake_time)
-        model.handle_video(self.input, self.output, begin_sec, end_sec)
+        model.handle_video(self.input, self.output, begin_sec)
 
 
 class VFXWithModel(VFXBase):
