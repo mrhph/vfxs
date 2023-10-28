@@ -14,9 +14,9 @@ from starlette.datastructures import UploadFile as StarletteUploadFile
 from vfxs.config import ASSET_EXPIRE_TIME, DATA_DIR, COS_BUCKET_NAME
 from vfxs.models import database, material
 from vfxs.utils.request import paras_form_content_disposition
-from vfxs.utils.response import jsonify, error_jsonify
+from vfxs.utils.response import response_200, response_400
 from vfxs.utils.cos import CosStorage
-from vfxs.vfx import get_vfx_handle, concat_videos, add_music_to_video
+# from vfxs.vfx import get_vfx_handle, concat_videos, add_music_to_video
 from . import router
 
 
@@ -78,19 +78,19 @@ async def asset_upload(zone: str, request: Request):
             continue
         name, storage = await save_or_update_zone_asset(zone, file)
         response.append({'name': name, 'size': storage['info']['size']})
-    return jsonify(response)
+    return response_200(response)
 
 
 @router.get('/zone/{zone}/asset')
 async def get_asset(zone: str, bt: str = 'pretreatment'):
     if bt != 'pretreatment':
-        return error_jsonify(message=f'暂不支持非{bt}类型文件查询')
+        return response_400(message=f'暂不支持非{bt}类型文件查询')
     sql = sa.select(
         material.c.name, material.c.storage
     ).where(material.c.zone == zone, material.c.bt == bt)
     data = await database.fetch_all(sql)
     response = [{'name': i.name, 'size': i.storage['info']['size']} for i in data]
-    return jsonify(response)
+    return response_200(response)
 
 
 async def get_storage_path(zone: str, name: str) -> str:
@@ -111,7 +111,7 @@ async def synth_oneshot(zone: str, request: Request):
         if isinstance(v, StarletteUploadFile):
             await save_or_update_zone_asset(zone, v)
     if not rules:
-        return error_jsonify(message='缺少合成规则参数rules')
+        return response_400(message='缺少合成规则参数rules')
     videos = list()
     for clip in rules['clips']:
         if clip['vfx']['code'] in ['VFXEnlargeFaces', 'VFXPassersbyBlurred', 'VFXPersonFollowFocus']:
@@ -140,4 +140,4 @@ async def synth_oneshot(zone: str, request: Request):
         'cos': {'bucket': COS_BUCKET_NAME, 'key': cos_key},
         'path': result
     }
-    return jsonify(response)
+    return response_200(response)
