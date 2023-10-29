@@ -3,10 +3,13 @@
 #
 # coding: utf-8
 import logging
+import time
 from importlib.metadata import entry_points
 
 from fastapi import FastAPI
 from fastapi.exceptions import HTTPException
+from fastapi.routing import APIRoute
+from starlette.types import Scope, Receive, Send
 
 from vfxs.models.database import database
 from vfxs.utils.enums import ResponseCode
@@ -40,6 +43,15 @@ async def exception_handler(request, exc):
 
 async def status_code_handler(request, exc):
     return jsonify(code=ResponseCode.E10100, message=str(exc.detail), status_code=exc.status_code)
+
+
+class RouteClass(APIRoute):
+
+    async def handle(self, scope: Scope, receive: Receive, send: Send) -> None:
+        start = int(time.time() * 1000)
+        await super().handle(scope, receive, send)
+        end = int(time.time() * 1000)
+        print(f'{scope["client"][0]}:{scope["client"][1]} - {scope["method"]} {scope["path"]} {scope["type"].upper()}/{scope["http_version"]} cost: {end - start}ms')
 
 
 def get_app():
