@@ -16,7 +16,7 @@ from vfxs.models import database, material
 from vfxs.utils.request import paras_form_content_disposition
 from vfxs.utils.response import response_200, response_400
 from vfxs.utils.cos import CosStorage
-from vfxs.vfx import get_vfx_handle, concat_videos, add_music_to_video
+from vfxs.vfx import get_vfx_handle, concat_videos, add_music_to_video, convert_video
 from . import router
 
 
@@ -26,13 +26,22 @@ ASSET_DIR.mkdir(parents=True, exist_ok=True)
 VFX_OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
-async def save_or_update_zone_asset(zone: str, file: StarletteUploadFile) -> (str, dict):
+async def save_or_update_zone_asset(zone: str, file: StarletteUploadFile, bt: str) -> (str, dict):
     ft = file.filename.rsplit('.', 1)[-1]  # 文件类型
     name = paras_form_content_disposition(file.headers['content-disposition'])['name']  # name
     ASSET_DIR.joinpath(zone).mkdir(parents=True, exist_ok=True)
-    path = ASSET_DIR.joinpath(f'{zone}/{name}.{ft}')
-    async with aiofiles.open(path, 'wb') as fp:
-        await fp.write(await file.read())
+    if bt == 'transition':
+        tmp = ASSET_DIR.joinpath(f'{zone}/{uuid.uuid4().hex}.{ft}')
+        path = ASSET_DIR.joinpath(f'{zone}/{name}.mp4')
+        async with aiofiles.open(tmp, 'wb') as fp:
+            await fp.write(await file.read())
+        ft = 'mp4'
+        convert_video(str(tmp), str(path))
+        tmp.unlink(missing_ok=True)
+    else:
+        path = ASSET_DIR.joinpath(f'{zone}/{name}.{ft}')
+        async with aiofiles.open(path, 'wb') as fp:
+            await fp.write(await file.read())
     storage = {
         'type': 'systemFile',
         'info': {'path': str(path), 'size': file.size, 'ft': ft}
@@ -56,7 +65,7 @@ async def save_or_update_zone_asset(zone: str, file: StarletteUploadFile) -> (st
             'name': name,
             'filename': file.filename,
             'ft': file.filename.rsplit('.', 1)[-1],
-            'bt': 'pretreatment',
+            'bt': bt,
             'zone': zone,
             'storage': storage,
             'save_time': current_time,
@@ -76,7 +85,7 @@ async def asset_upload(zone: str, request: Request):
     for k, file in form.items():
         if not isinstance(file, StarletteUploadFile):
             continue
-        name, storage = await save_or_update_zone_asset(zone, file)
+        name, storage = await save_or_update_zone_asset(zone, file, 'transition')
         response.append({'name': name, 'size': storage['info']['size']})
     return response_200(response)
 
@@ -109,18 +118,21 @@ async def synth_oneshot(zone: str, request: Request):
         if k == 'rules':
             rules = json.loads(v)
         if isinstance(v, StarletteUploadFile):
-            await save_or_update_zone_asset(zone, v)
+            await save_or_update_zone_asset(zone, v, 'character')
     if not rules:
         return response_400(message='缺少合成规则参数rules')
     videos = list()
     for clip in rules['clips']:
-        if clip['vfx']['code'] in ['VFXEnlargeFaces', 'VFXPassersbyBlurred', 'VFXPersonFollowFocus']:
-            clip['vfx']['params']['main_char'] = await get_storage_path(zone, clip['vfx']['params']['main_char'])
         ori_path = await get_storage_path(zone, clip['name'])
-        out_path = VFX_OUT_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
-        handle = get_vfx_handle(clip['vfx']['code'])(ori_path, out_path)
-        handle(**clip['vfx']['params'])
-        videos.append(str(out_path))
+        if clip['vfx'] is None:
+            videos.append(ori_path)
+        else:
+            if clip['vfx']['code'] in ['VFXEnlargeFaces', 'VFXPassersbyBlurred', 'VFXPersonFollowFocus']:
+                clip['vfx']['params']['main_char'] = await get_storage_path(zone, clip['vfx']['params']['main_char'])
+            out_path = VFX_OUT_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
+            handle = get_vfx_handle(clip['vfx']['code'])(ori_path, out_path)
+            handle(**clip['vfx']['params'])
+            videos.append(str(out_path))
     if len(videos) == 1:
         video = videos[0]
     else:
@@ -133,11 +145,9 @@ async def synth_oneshot(zone: str, request: Request):
     else:
         result = video
 
-    cos_key = uuid.uuid4().hex + '.mp4'
-    CosStorage.upload_file(result, cos_key)
-
+    upload_ret = CosStorage.upload_file(result, uuid.uuid4().hex + '.mp4')
     response = {
-        'cos': {'bucket': COS_BUCKET_NAME, 'key': cos_key},
+        'cos': {'Bucket': upload_ret.Bucket, 'Key': upload_ret.Key, 'Location': upload_ret.Location},
         'path': result
     }
     return response_200(response)

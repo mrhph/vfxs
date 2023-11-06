@@ -20,7 +20,8 @@ __all__ = [
     'VFXPersonFollowFocus',
     'VFXMVCover',
     'concat_videos',
-    'add_music_to_video'
+    'add_music_to_video',
+    'convert_video'
 ]
 
 
@@ -193,6 +194,10 @@ class VFXMVCover(VFXBase):
     ):
         model = vfx4py.VFXMVCover(cover_path, cover_mask_path, scale)
         model.handle_video(self.input, self.output, begin_sec)
+
+
+def convert_video(src: str, dst: str):
+    vfx4py.convert_video(src, dst)
 
 
 def concat_videos(out_path: str, *videos):

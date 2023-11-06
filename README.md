@@ -142,10 +142,7 @@ Content-Type: application/json
     },
     {
       "name": "video_2",
-      "vfx": {
-        "code": "VFXFrameFreeze",
-        "params": {"begin_sec": 1}
-      }
+      "vfx": null
     }
   ],
   "music": {
@@ -177,8 +174,9 @@ music_1音频数据...
   "message": "success",
   "data": {
     "cos": {
-      "bucket": "vfxs-test-1318254791",
-      "key": "1b8dcdb71d8e4818b3190d9669cde670.mp4"
+      "Bucket": "vfxs-test-1318254791",
+      "Key": "xxx.mp4"
+      "Location": "视频地址"
     }
   }
 }
