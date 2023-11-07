@@ -15,22 +15,13 @@ def test_asset_upload():
     payload = {'rules': json.dumps({'a': 123})}
     files = [
         (
-            'a',
+            'test_1',
             (
-                'a.mp4',
-                open('./data/a.mp4', 'rb'),
+                'test_1.mp4',
+                open('./data/test_1.mp4', 'rb'),
                 'application/octet-stream',
             )
-        ),
-        (
-            'b',
-            (
-                'b.mp4',
-                open('./data/b.mp4', 'rb'),
-                'application/octet-stream',
-                # {'Content-Disposition': 'form-data; name="b"; filename="b.mp4"'}
-            )
-        ),
+        )
     ]
     headers = {}
     response = requests.post(url, headers=headers, data=payload, files=files)
