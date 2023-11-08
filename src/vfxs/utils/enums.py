@@ -12,8 +12,3 @@ class ResponseCode(enum.IntEnum):
     E10002 = 10002  # 任务提交失败
     E10003 = 10003  # 文件找不到
     E10100 = 10100  # 内部错误
-
-
-if __name__ == '__main__':
-    print(ResponseCode)
-    print('E10000' in ResponseCode)

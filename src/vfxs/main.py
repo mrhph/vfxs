@@ -12,7 +12,7 @@ from fastapi.exceptions import HTTPException
 from fastapi.routing import APIRoute
 from starlette.types import Scope, Receive, Send
 
-from vfxs.config import DATA_DIR, LOG_DIR, SERVER_PORT
+from vfxs.config import DATA_DIR, LOG_DIR, TMP_DIR, MATERIAL_DIR, SERVER_PORT
 from vfxs.models.database import database
 from vfxs.utils.enums import ResponseCode
 from vfxs.utils.logger import LOGGER
@@ -77,6 +77,8 @@ def get_app():
 def server_startup():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     LOG_DIR.mkdir(parents=True, exist_ok=True)
+    TMP_DIR.mkdir(parents=True, exist_ok=True)
+    MATERIAL_DIR.mkdir(parents=True, exist_ok=True)
 
 
 if __name__ == '__main__':
