@@ -31,10 +31,9 @@ async def asset_upload(zone: str, request: Request):
             continue
         ft = file.filename.rsplit('.', 1)[-1]  # 文件类型
         name = paras_form_content_disposition(file.headers['content-disposition'])['name']  # name
-
-        if ft == 'acc':  # 音频数据
+        if ft == 'aac':  # 音频数据
             bt = 'bgm'
-            path = MATERIAL_DIR.joinpath(f'{zone}/{name}.mp4')
+            path = MATERIAL_DIR.joinpath(f'{zone}/{name}.{ft}')
             async with aiofiles.open(path, 'wb') as fp:
                 await fp.write(await file.read())
         else:            # 视频数据需要做格式对齐
@@ -122,7 +121,7 @@ async def synth_oneshot(zone: str, request: Request):
             use_vfx_videos.append((name, path, clip['vfx']))
         if not path:
             return response_400(f'{name}在素材库或者form-data中不存在，请检查入参')
-        videos.append((name, path))
+        videos.append((name, path, clip.get('vfx', None)))
 
     # 进行特效处理
     vfx_videos = dict()
@@ -135,7 +134,7 @@ async def synth_oneshot(zone: str, request: Request):
         vfx_videos[name] = _out
 
     # 替换需要进行特效处理的人物视频，顺序不能乱
-    videos = [str(vfx_videos.get(name, path)) for name, path in videos]
+    videos = [str(vfx_videos[name] if effect else path) for name, path, effect in videos]
     # 视频合并
     if len(videos) == 1:
         video = videos[0]
@@ -146,7 +145,7 @@ async def synth_oneshot(zone: str, request: Request):
     if rules.get('music'):
         music = await material.get_storage_path(zone, rules['music']['name'])
         result = TMP_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
-        add_music_to_video(str(result), video, music)
+        add_music_to_video(str(result), str(video), str(music))
     else:
         result = video
     # 上传至cos
