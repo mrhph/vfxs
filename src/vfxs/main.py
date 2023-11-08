@@ -64,6 +64,11 @@ class RouteClass(APIRoute):
 
 def get_app():
     app = FastAPI()
+
+    @app.get('/')
+    def index():
+        return jsonify(code=ResponseCode.E0, message='vfxs', status_code=200)
+
     load_modules(app)
     app.add_exception_handler(HTTPException, exception_handler)
     app.add_exception_handler(Exception, exception_handler)
