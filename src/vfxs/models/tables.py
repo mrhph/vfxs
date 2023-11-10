@@ -3,6 +3,7 @@
 #
 # coding: utf-8
 import time
+import typing
 import sqlalchemy as sa
 
 from .database import metadata, database
@@ -30,11 +31,13 @@ material = sa.Table(
 )
 
 
-async def get_storage_path(zone: str, name: str) -> str:
+async def get_storage_path(zone: str, name: str) -> typing.Union[str, None]:
     sql = sa.select(material.c.storage).where(
         material.c.zone == zone, material.c.name == name
     )
     data = await database.fetch_one(sql)
+    if not data:
+        return None
     return data.storage['info']['path']
 
 material.get_storage_path = get_storage_path

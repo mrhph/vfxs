@@ -3,6 +3,7 @@
 #
 # coding: utf-8
 import json
+import pathlib
 import time
 import uuid
 
@@ -137,7 +138,7 @@ async def synth_oneshot(zone: str, request: Request):
     videos = [str(vfx_videos[name] if effect else path) for name, path, effect in videos]
     # 视频合并
     if len(videos) == 1:
-        video = videos[0]
+        video = pathlib.Path(videos[0])
     else:
         video = TMP_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
         concat_videos(str(video), *videos)
