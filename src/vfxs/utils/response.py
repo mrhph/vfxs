@@ -28,3 +28,7 @@ def response_200(data):
 
 def response_400(message: str, code: ResponseCode = ResponseCode.E10000):
     return jsonify(code=code, message=message, status_code=status.HTTP_400_BAD_REQUEST)
+
+
+def response_500(message: str, code: ResponseCode = ResponseCode.E10100):
+    return jsonify(code=code, message=message, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

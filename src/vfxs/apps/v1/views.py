@@ -17,7 +17,7 @@ from vfxs.models import database, material
 from vfxs.utils.cos import CosStorage
 from vfxs.utils.logger import LOGGER
 from vfxs.utils.request import paras_form_content_disposition
-from vfxs.utils.response import response_200, response_400
+from vfxs.utils.response import response_200, response_400, response_500
 from vfxs.vfx import get_vfx_handle, concat_videos, add_music_to_video, convert_video
 from . import router
 
@@ -113,29 +113,37 @@ async def synth_oneshot(zone: str, request: Request):
     if not rules:
         return response_400(message='缺少合成规则参数rules')
 
+    LOGGER.info(rules)
+
     # 提取人物视频及需要进行特效处理的人物视频
     videos, use_vfx_videos = list(), list()
-    for clip in rules['clips']:
+    for idx, clip in enumerate(rules['clips']):
         name = clip['name']
         path = binary_files.get(name) if 'vfx' in clip else await material.get_storage_path(zone, name)
         if clip.get('vfx'):
-            use_vfx_videos.append((name, path, clip['vfx']))
+            use_vfx_videos.append((idx, name, path, clip['vfx']))
         if not path:
             return response_400(f'{name}在素材库或者form-data中不存在，请检查入参')
-        videos.append((name, path, clip.get('vfx', None)))
+        videos.append((idx, name, path, clip.get('vfx', None)))
 
     # 进行特效处理
     vfx_videos = dict()
-    for name, path, effect in use_vfx_videos:
-        if effect['code'] in ['VFXEnlargeFaces', 'VFXPassersbyBlurred', 'VFXPersonFollowFocus']:
+    for idx, name, path, effect in use_vfx_videos:
+        if effect['code'] in ['VFXViewfinderSlowAction', 'VFXEnlargeFaces', 'VFXPassersbyBlurred', 'VFXPersonFollowFocus']:
             effect['params']['main_char'] = str(binary_files[effect['params']['main_char']])
         _out = TMP_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
-        handle = get_vfx_handle(effect['code'])(path, _out)
-        handle(**effect['params'])
-        vfx_videos[name] = _out
+        try:
+            handle = get_vfx_handle(effect['code'])(path, _out)
+            handle(**effect['params'])
+        except Exception as e:
+            return response_500(message=f'{effect["code"]}特效处理{name}视频失败.{e}')
+        vfx_videos[idx] = _out
 
     # 替换需要进行特效处理的人物视频，顺序不能乱
-    videos = [str(vfx_videos[name] if effect else path) for name, path, effect in videos]
+    videos = [str(vfx_videos[idx] if effect else path) for idx, name, path, effect in videos]
+
+    LOGGER.info(videos)
+
     # 视频合并
     if len(videos) == 1:
         video = pathlib.Path(videos[0])
@@ -156,3 +164,4 @@ async def synth_oneshot(zone: str, request: Request):
         'path': str(result)
     }
     return response_200(response)
+
