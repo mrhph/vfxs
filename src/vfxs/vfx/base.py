@@ -10,24 +10,22 @@ from pathlib import Path
 
 
 class VFXBase:
-    def __init__(self, original: typing.Union[Path, str], output: typing.Union[Path, str]):
+    def __init__(self, ori: typing.Union[Path, str], out: typing.Union[Path, str]):
 
-        if not os.path.exists(original):
-            raise FileNotFoundError(f'待处理文件{original}不存在')
+        if not os.path.exists(ori):
+            raise FileNotFoundError(f'待处理文件{ori}不存在')
 
-        self.input = str(original)
-        self.output = str(output)
-        self.vfx_code: str = ...
-        self.vfx_name: str = ...
-        self.model = None
+        self.ori: str = str(ori)
+        self.out: str = str(out)
+        self.code: str = ...
+        self.name: str = ...
 
-    def export_cos(self):
-        pass
-
-    def check_params(self, params: list[str], kw: dict):
-        diff = set(params) - set(kw.keys())
-        if diff:
-            raise ValueError(f'{self.vfx_name}中缺少{list(diff)}入参')
+    def check_params(self, params: list[tuple[str, type]], kw: dict):
+        for i in params:
+            if i not in kw:
+                raise ValueError(f'{self.name}参数{i[0]}缺失')
+            if not isinstance(kw[i[0]], i[1]):
+                raise ValueError(f'{self.name}参数{i[0]}类型错误, 应为{i[1].__name__}')
 
     @abc.abstractmethod
     def supplied_params(self, **kwargs) -> dict:
@@ -39,4 +37,3 @@ class VFXBase:
 
     def __call__(self, *args, **kwargs):
         self.dispose_of(**self.supplied_params(**kwargs))
-        self.export_cos()

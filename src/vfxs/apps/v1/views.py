@@ -2,10 +2,12 @@
 # Copyright 2020 BE-GAIA. All Rights Reserved.
 #
 # coding: utf-8
+import asyncio
 import json
 import pathlib
 import time
 import uuid
+from concurrent.futures import ProcessPoolExecutor
 
 import aiofiles
 import sqlalchemy as sa
@@ -18,8 +20,10 @@ from vfxs.utils.cos import CosStorage
 from vfxs.utils.logger import LOGGER
 from vfxs.utils.request import paras_form_content_disposition
 from vfxs.utils.response import response_200, response_400, response_500
-from vfxs.vfx import get_vfx_handle, concat_videos, add_music_to_video, convert_video
+from vfxs.vfx import convert_video, get_vfx_handle, concat_videos, add_music_to_video
 from . import router
+
+MAIN_CHAR_VFX = ['VFXViewfinderSlowAction', 'VFXEnlargeFaces', 'VFXPassersbyBlurred', 'VFXPersonFollowFocus']
 
 
 @router.post('/zone/{zone}/asset')
@@ -95,6 +99,16 @@ async def get_asset(zone: str, bt: str = 'pretreatment'):
     return response_200(response)
 
 
+def handle_video(idx, code, ori, params, video_name):
+    out = TMP_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
+    handle = get_vfx_handle(code)(ori, out)
+    try:
+        handle(**params)
+    except Exception as e:
+        raise Exception(f'{handle.name}处理{video_name}失败. 原因: {e}')
+    return idx, out
+
+
 @router.post('/zone/{zone}/synth/oneshot')
 async def synth_oneshot(zone: str, request: Request):
     form = await request.form()
@@ -128,17 +142,20 @@ async def synth_oneshot(zone: str, request: Request):
 
     # 进行特效处理
     vfx_videos = dict()
-    for idx, name, path, effect in use_vfx_videos:
-        if effect['code'] in ['VFXViewfinderSlowAction', 'VFXEnlargeFaces', 'VFXPassersbyBlurred', 'VFXPersonFollowFocus']:
-            effect['params']['main_char'] = str(binary_files[effect['params']['main_char']])
-        _out = TMP_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
-        try:
-            handle = get_vfx_handle(effect['code'])(path, _out)
-            handle(**effect['params'])
-        except Exception as e:
-            return response_500(message=f'{effect["code"]}特效处理{name}视频失败.{e}')
-        vfx_videos[idx] = _out
-
+    if use_vfx_videos:
+        with ProcessPoolExecutor(max_workers=len(use_vfx_videos)) as pool:
+            loop = asyncio.get_event_loop()
+            tasks = list()
+            for idx, name, path, effect in use_vfx_videos:
+                if effect['code'] in MAIN_CHAR_VFX:
+                    effect['params']['main_char'] = str(binary_files[effect['params']['main_char']])
+                tasks.append(loop.run_in_executor(
+                    pool, handle_video, idx, effect['code'], path, effect['params'], name))
+            try:
+                result = await asyncio.gather(*tasks)
+            except Exception as e:
+                return response_500(message=str(e))
+            vfx_videos = {i[0]: i[1] for i in result}
     # 替换需要进行特效处理的人物视频，顺序不能乱
     videos = [str(vfx_videos[idx] if effect else path) for idx, name, path, effect in videos]
 
