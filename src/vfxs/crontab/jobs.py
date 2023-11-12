@@ -15,6 +15,6 @@ async def clear_vfxs_tmp():
     logger.info('执行文件清理')
     current = time.time()
     for path in TMP_DIR.iterdir():
-        if path.stat().st_mtime - current > 86400:  # 1 day
+        if current - path.stat().st_mtime > 86400:  # 1 day
             path.unlink(missing_ok=True)
             logger.info(f'删除{path}')
