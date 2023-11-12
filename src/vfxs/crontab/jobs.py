@@ -8,7 +8,7 @@ from loguru import logger
 
 from vfxs.config import TMP_DIR, LOG_DIR
 
-logger.add(LOG_DIR.joinpath('clear_vfxs_tmp'))
+logger.add(LOG_DIR.joinpath('clear_vfxs_tmp.log'))
 
 
 async def clear_vfxs_tmp():

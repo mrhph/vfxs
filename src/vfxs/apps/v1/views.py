@@ -20,7 +20,7 @@ from vfxs.utils.cos import CosStorage
 from vfxs.utils.logger import LOGGER
 from vfxs.utils.request import paras_form_content_disposition
 from vfxs.utils.response import response_200, response_400, response_500
-# from vfxs.vfx import convert_video, get_vfx_handle, concat_videos, add_music_to_video
+from vfxs.vfx import convert_video, get_vfx_handle, concat_videos, add_music_to_video
 from . import router
 
 MAIN_CHAR_VFX = ['VFXViewfinderSlowAction', 'VFXEnlargeFaces', 'VFXPassersbyBlurred', 'VFXPersonFollowFocus']

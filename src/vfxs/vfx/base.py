@@ -21,11 +21,11 @@ class VFXBase:
         self.name: str = ...
 
     def check_params(self, params: list[tuple[str, type]], kw: dict):
-        for i in params:
-            if i not in kw:
-                raise ValueError(f'{self.name}参数{i[0]}缺失')
-            if not isinstance(kw[i[0]], i[1]):
-                raise ValueError(f'{self.name}参数{i[0]}类型错误, 应为{i[1].__name__}')
+        for k, t in params:
+            if k not in kw:
+                raise ValueError(f'{self.name}参数{k}缺失')
+            if not isinstance(kw[k], t):
+                raise ValueError(f'{self.name}参数{k}类型错误, 应为{t.__name__}')
 
     @abc.abstractmethod
     def supplied_params(self, **kwargs) -> dict:

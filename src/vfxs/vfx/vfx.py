@@ -37,8 +37,8 @@ class VFXFrameFreeze(VFXBase):
 
     def __init__(self, ori: typing.Union[Path, str], out: typing.Union[Path, str]):
         super().__init__(ori, out)
-        self.vfx_code = 'VFXFrameFreeze'
-        self.vfx_name = '画框定格'
+        self.code = 'VFXFrameFreeze'
+        self.name = '画框定格'
 
     def supplied_params(self, **kwargs):
         params = [('begin_sec', int)]
@@ -75,8 +75,8 @@ class VFXRGBShake(VFXBase):
 
     def __init__(self, ori: typing.Union[Path, str], out: typing.Union[Path, str]):
         super().__init__(ori, out)
-        self.vfx_code = 'VFXRGBShake'
-        self.vfx_name = 'RGB震动'
+        self.code = 'VFXRGBShake'
+        self.name = 'RGB震动'
 
     def supplied_params(self, **kwargs) -> dict:
         params = [('begin_sec', int)]
@@ -125,7 +125,6 @@ class VFXWithModel(VFXBase):
         self.cosine_similar_thresh = None
 
     def supplied_params(self, **kwargs) -> dict:
-        # str
         params = [('main_char', str)]
         self.check_params(params, kwargs)
         return {
@@ -190,11 +189,11 @@ class VFXMVCover(VFXBase):
 
     def __init__(self, ori: typing.Union[Path, str], out: typing.Union[Path, str]):
         super().__init__(ori, out)
-        self.vfx_code = 'VFXMVCover'
-        self.vfx_name = 'MV封面'
+        self.code = 'VFXMVCover'
+        self.name = 'MV封面'
 
     def supplied_params(self, **kwargs) -> dict:
-        params = [('main_char', str)]
+        params = [('begin_sec', int)]
         self.check_params(params, kwargs)
         return {
             'begin_sec': kwargs['begin_sec']
