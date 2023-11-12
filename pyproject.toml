@@ -18,6 +18,7 @@ cos-python-sdk-v5 = "^1.9.26"
 apscheduler = "^3.10.4"
 pytest-asyncio = "^0.21.1"
 loguru = "^0.7.2"
+gunicorn = "^21.2.0"
 
 
 [build-system]
