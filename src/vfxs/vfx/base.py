@@ -19,6 +19,7 @@ class VFXBase:
         self.out: str = str(out)
         self.code: str = ...
         self.name: str = ...
+        self.model = None
 
     def check_params(self, params: list[tuple[str, type]], kw: dict):
         for k, t in params:

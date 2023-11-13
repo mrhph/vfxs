@@ -58,8 +58,8 @@ class RouteClass(APIRoute):
         start = int(time.time() * 1000)
         await super().handle(scope, receive, send)
         end = int(time.time() * 1000)
-        print(f'{scope["client"][0]}:{scope["client"][1]} - {scope["method"]} {scope["path"]} '
-              f'{scope["type"].upper()}/{scope["http_version"]} cost: {end - start}ms')
+        LOGGER.debug(f'{scope["client"][0]}:{scope["client"][1]} - {scope["method"]} {scope["path"]} '
+                     f'{scope["type"].upper()}/{scope["http_version"]} cost: {end - start}ms')
 
 
 def get_app():
@@ -84,6 +84,9 @@ def server_startup():
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     TMP_DIR.mkdir(parents=True, exist_ok=True)
     MATERIAL_DIR.mkdir(parents=True, exist_ok=True)
+    # 生成模型的engine文件
+    from vfxs.vfx import VFXViewfinderSlowAction
+    VFXViewfinderSlowAction('', '')
 
 
 if __name__ == '__main__':

@@ -29,16 +29,15 @@ VFX_RES_DIR = DATA_DIR.joinpath('vfx_res')
 
 
 class VFXFrameFreeze(VFXBase):
-    model = vfx4py.VFXFrameFreeze(
-        str(VFX_RES_DIR.joinpath(f'VFXFrameFreeze/dgphotofrm.png')),
-        str(VFX_RES_DIR.joinpath(f'VFXFrameFreeze/dgphotofrmmask.jpg')),
-        0.8
-    )
-
     def __init__(self, ori: typing.Union[Path, str], out: typing.Union[Path, str]):
         super().__init__(ori, out)
         self.code = 'VFXFrameFreeze'
         self.name = '画框定格'
+        self.model = vfx4py.VFXFrameFreeze(
+            str(VFX_RES_DIR.joinpath(f'VFXFrameFreeze/dgphotofrm.png')),
+            str(VFX_RES_DIR.joinpath(f'VFXFrameFreeze/dgphotofrmmask.jpg')),
+            0.8
+        )
 
     def supplied_params(self, **kwargs):
         params = [('begin_sec', int)]
@@ -52,12 +51,11 @@ class VFXFrameFreeze(VFXBase):
 
 
 class VFXSlowMotion(VFXBase):
-    model = vfx4py.VFXSlowMotion()
-
     def __init__(self, ori: typing.Union[Path, str], out: typing.Union[Path, str]):
         super().__init__(ori, out)
         self.code = 'VFXSlowMotion'
         self.name = '慢动作'
+        self.model = vfx4py.VFXSlowMotion()
 
     def supplied_params(self, **kwargs):
         params = [('begin_sec', int)]
@@ -71,12 +69,12 @@ class VFXSlowMotion(VFXBase):
 
 
 class VFXRGBShake(VFXBase):
-    model = vfx4py.VFXRGBShake(0.1, 0.2, 0.3, 15)
 
     def __init__(self, ori: typing.Union[Path, str], out: typing.Union[Path, str]):
         super().__init__(ori, out)
         self.code = 'VFXRGBShake'
         self.name = 'RGB震动'
+        self.model = vfx4py.VFXRGBShake(0.1, 0.2, 0.3, 15)
 
     def supplied_params(self, **kwargs) -> dict:
         params = [('begin_sec', int)]
@@ -91,16 +89,15 @@ class VFXRGBShake(VFXBase):
 
 class VFXViewfinderSlowAction(VFXBase):
 
-    model = vfx4py.VFXViewfinderSlowAction(
-        str(VFX_RES_DIR.joinpath('VFXWithModel/FaceDetect.wts')),
-        str(VFX_RES_DIR.joinpath('VFXWithModel/FaceRecognition.wts')),
-        1.005
-    )
-
     def __init__(self, ori: typing.Union[Path, str], out: typing.Union[Path, str]):
         super().__init__(ori, out)
         self.code = 'VFXViewfinderSlowAction'
         self.name = '取景框慢动作'
+        self.model = vfx4py.VFXViewfinderSlowAction(
+            str(VFX_RES_DIR.joinpath('VFXWithModel/FaceDetect.wts')),
+            str(VFX_RES_DIR.joinpath('VFXWithModel/FaceRecognition.wts')),
+            1.005
+        )
 
     def supplied_params(self, **kwargs):
         params = [('main_char', str)]
@@ -137,57 +134,54 @@ class VFXWithModel(VFXBase):
 
 class VFXEnlargeFaces(VFXWithModel):
 
-    model = vfx4py.VFXEnlargeFaces(
-        str(VFX_RES_DIR.joinpath('VFXWithModel/FaceDetect.wts')),
-        str(VFX_RES_DIR.joinpath('VFXWithModel/FaceRecognition.wts')),
-        1.005
-    )
-
     def __init__(self, ori: typing.Union[Path, str], out: typing.Union[Path, str]):
         super().__init__(ori, out)
         self.code = 'VFXEnlargeFaces'
         self.name = 'C位放大镜'
+        self.model = vfx4py.VFXEnlargeFaces(
+            str(VFX_RES_DIR.joinpath('VFXWithModel/FaceDetect.wts')),
+            str(VFX_RES_DIR.joinpath('VFXWithModel/FaceRecognition.wts')),
+            1.005
+        )
 
 
 class VFXPassersbyBlurred(VFXWithModel):
-
-    model = vfx4py.VFXPassersbyBlurred(
-        str(VFX_RES_DIR.joinpath('VFXWithModel/FaceDetect.wts')),
-        str(VFX_RES_DIR.joinpath('VFXWithModel/FaceRecognition.wts')),
-        1
-    )
 
     def __init__(self, ori: typing.Union[Path, str], out: typing.Union[Path, str]):
         super().__init__(ori, out)
         self.code = 'VFXPassersbyBlurred'
         self.name = '路人虚化'
+        self.model = vfx4py.VFXPassersbyBlurred(
+            str(VFX_RES_DIR.joinpath('VFXWithModel/FaceDetect.wts')),
+            str(VFX_RES_DIR.joinpath('VFXWithModel/FaceRecognition.wts')),
+            1
+        )
 
 
 class VFXPersonFollowFocus(VFXWithModel):
-
-    model = vfx4py.VFXPersonFollowFocus(
-        str(VFX_RES_DIR.joinpath('VFXWithModel/FaceDetect.wts')),
-        str(VFX_RES_DIR.joinpath('VFXWithModel/FaceRecognition.wts')),
-        1.005
-    )
 
     def __init__(self, ori: typing.Union[Path, str], out: typing.Union[Path, str]):
         super().__init__(ori, out)
         self.code = 'VFXPersonFollowFocus'
         self.name = '变焦'
+        self.model = vfx4py.VFXPersonFollowFocus(
+            str(VFX_RES_DIR.joinpath('VFXWithModel/FaceDetect.wts')),
+            str(VFX_RES_DIR.joinpath('VFXWithModel/FaceRecognition.wts')),
+            1.005
+        )
 
 
 class VFXMVCover(VFXBase):
-    model = vfx4py.VFXMVCover(
-        str(VFX_RES_DIR.joinpath(f'VFXMVCover/MVCover.png')),
-        str(VFX_RES_DIR.joinpath(f'VFXMVCover/MVCover_mask.jpg')),
-        0.7
-    )
 
     def __init__(self, ori: typing.Union[Path, str], out: typing.Union[Path, str]):
         super().__init__(ori, out)
         self.code = 'VFXMVCover'
         self.name = 'MV封面'
+        self.model = vfx4py.VFXMVCover(
+            str(VFX_RES_DIR.joinpath(f'VFXMVCover/MVCover.png')),
+            str(VFX_RES_DIR.joinpath(f'VFXMVCover/MVCover_mask.jpg')),
+            0.7
+        )
 
     def supplied_params(self, **kwargs) -> dict:
         params = [('begin_sec', int)]

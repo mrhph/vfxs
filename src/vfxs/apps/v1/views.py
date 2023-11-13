@@ -6,6 +6,7 @@ import asyncio
 import json
 import pathlib
 import time
+import typing
 import uuid
 from concurrent.futures import ProcessPoolExecutor
 
@@ -99,13 +100,19 @@ async def get_asset(zone: str, bt: str = 'pretreatment'):
     return response_200(response)
 
 
-def handle_video(idx, code, ori, params, video_name):
-    out = TMP_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
-    handle = get_vfx_handle(code)(ori, out)
-    try:
-        handle(**params)
-    except Exception as e:
-        raise Exception(f'{handle.name}处理{video_name}失败. 原因: {e}')
+def handle_video(idx: int, ori: typing.Union[pathlib.Path, str], effects: list[dict], video_name: str):
+    out = None
+    LOGGER.info(f'处理{video_name}视频, 参数: {effects}')
+    for effect in effects:
+        out = TMP_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
+        handle = get_vfx_handle(effect['code'])(ori, out)
+        try:
+            handle(**effect['params'])
+        except Exception as e:
+            LOGGER.error(f'{handle.name}处理{video_name}失败. 原因: {e}')
+            out = ori
+        else:
+            ori = out
     return idx, out
 
 
@@ -146,11 +153,12 @@ async def synth_oneshot(zone: str, request: Request):
         with ProcessPoolExecutor(max_workers=len(use_vfx_videos)) as pool:
             loop = asyncio.get_event_loop()
             tasks = list()
-            for idx, name, path, effect in use_vfx_videos:
-                if effect['code'] in MAIN_CHAR_VFX:
-                    effect['params']['main_char'] = str(binary_files[effect['params']['main_char']])
-                tasks.append(loop.run_in_executor(
-                    pool, handle_video, idx, effect['code'], path, effect['params'], name))
+            for idx, name, path, effects in use_vfx_videos:
+                effects = effects if isinstance(effects, list) else [effects]
+                for effect in effects:  # 处理人像图片为具体路径
+                    if effect['code'] in MAIN_CHAR_VFX:
+                        effect['params']['main_char'] = str(binary_files[effect['params']['main_char']])
+                tasks.append(loop.run_in_executor(pool, handle_video, idx, path, effects, name))
             try:
                 result = await asyncio.gather(*tasks)
             except Exception as e:
@@ -158,8 +166,6 @@ async def synth_oneshot(zone: str, request: Request):
             vfx_videos = {i[0]: i[1] for i in result}
     # 替换需要进行特效处理的人物视频，顺序不能乱
     videos = [str(vfx_videos[idx] if effect else path) for idx, name, path, effect in videos]
-
-    LOGGER.info(videos)
 
     # 视频合并
     if len(videos) == 1:
