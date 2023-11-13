@@ -3,17 +3,15 @@
 #
 # coding: utf-8
 import logging
-import time
 import traceback
 from importlib.metadata import entry_points
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import HTTPException
-from fastapi.routing import APIRoute
-from starlette.types import Scope, Receive, Send
 
 from vfxs.config import DATA_DIR, LOG_DIR, TMP_DIR, MATERIAL_DIR, SERVER_PORT
 from vfxs.models.database import database
+from vfxs.server import UVICORN_LOGGING_CONFIG
 from vfxs.utils.enums import ResponseCode
 from vfxs.utils.logger import LOGGER
 from vfxs.utils.response import jsonify
@@ -52,16 +50,6 @@ async def status_code_handler(request: Request, exc):
     return jsonify(code=ResponseCode.E10100, message=str(exc.detail), status_code=exc.status_code)
 
 
-class RouteClass(APIRoute):
-
-    async def handle(self, scope: Scope, receive: Receive, send: Send) -> None:
-        start = int(time.time() * 1000)
-        await super().handle(scope, receive, send)
-        end = int(time.time() * 1000)
-        LOGGER.debug(f'{scope["client"][0]}:{scope["client"][1]} - {scope["method"]} {scope["path"]} '
-                     f'{scope["type"].upper()}/{scope["http_version"]} cost: {end - start}ms')
-
-
 def get_app():
     app = FastAPI()
 
@@ -93,4 +81,4 @@ if __name__ == '__main__':
     import uvicorn
     server_startup()
     LOGGER.info('启动server')
-    uvicorn.run(get_app(), host='0.0.0.0', port=SERVER_PORT)
+    uvicorn.run(get_app(), host='0.0.0.0', port=SERVER_PORT, log_config=UVICORN_LOGGING_CONFIG)
