@@ -103,16 +103,16 @@ class VFXViewfinderSlowAction(VFXBase):
         self.name = '取景框慢动作'
 
     def supplied_params(self, **kwargs):
-        params = [('begin_sec', int), ('main_char', str)]
+        params = [('main_char', str)]
         self.check_params(params, kwargs)
         return {
-            'begin_sec': kwargs['begin_sec'],
-            'main_char': kwargs['main_char']
+            'main_char': kwargs['main_char'],
+            'cosine_similar_thresh': kwargs.get('cosine_similar_thresh', 0.2)
         }
 
-    def dispose_of(self, main_char: str, begin_sec: int, *args, **kwargs):
+    def dispose_of(self, main_char: str, cosine_similar_thresh: float, *args, **kwargs):
         viewfinder_video_path = str(VFX_RES_DIR.joinpath(f'{self.code}/viewfinder.mp4'))
-        cosine_similar_thresh = 0.2
+        begin_sec = 0  # 郑伟要求填0
         self.model.handle_video(self.ori, viewfinder_video_path, self.out, main_char, begin_sec, cosine_similar_thresh)
 
 
@@ -122,17 +122,17 @@ class VFXWithModel(VFXBase):
 
     def __init__(self, ori: typing.Union[Path, str], out: typing.Union[Path, str]):
         super().__init__(ori, out)
-        self.cosine_similar_thresh = None
 
     def supplied_params(self, **kwargs) -> dict:
         params = [('main_char', str)]
         self.check_params(params, kwargs)
         return {
-            'main_char': kwargs['main_char']
+            'main_char': kwargs['main_char'],
+            'cosine_similar_thresh': kwargs.get('cosine_similar_thresh', 0.2)
         }
 
-    def dispose_of(self, main_char: str, *args, **kwargs):
-        self.model.handle_video(self.ori, self.out, main_char, self.cosine_similar_thresh)
+    def dispose_of(self, main_char: str, cosine_similar_thresh: float, *args, **kwargs):
+        self.model.handle_video(self.ori, self.out, main_char, cosine_similar_thresh)
 
 
 class VFXEnlargeFaces(VFXWithModel):
@@ -147,7 +147,6 @@ class VFXEnlargeFaces(VFXWithModel):
         super().__init__(ori, out)
         self.code = 'VFXEnlargeFaces'
         self.name = 'C位放大镜'
-        self.cosine_similar_thresh = 0.2
 
 
 class VFXPassersbyBlurred(VFXWithModel):
@@ -155,14 +154,13 @@ class VFXPassersbyBlurred(VFXWithModel):
     model = vfx4py.VFXPassersbyBlurred(
         str(VFX_RES_DIR.joinpath('VFXWithModel/FaceDetect.wts')),
         str(VFX_RES_DIR.joinpath('VFXWithModel/FaceRecognition.wts')),
-        1.1
+        1
     )
 
     def __init__(self, ori: typing.Union[Path, str], out: typing.Union[Path, str]):
         super().__init__(ori, out)
         self.code = 'VFXPassersbyBlurred'
         self.name = '路人虚化'
-        self.cosine_similar_thresh = 0.2
 
 
 class VFXPersonFollowFocus(VFXWithModel):
@@ -177,7 +175,6 @@ class VFXPersonFollowFocus(VFXWithModel):
         super().__init__(ori, out)
         self.code = 'VFXPersonFollowFocus'
         self.name = '变焦'
-        self.cosine_similar_thresh = 0.2
 
 
 class VFXMVCover(VFXBase):

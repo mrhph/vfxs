@@ -114,7 +114,7 @@ POST /1.0/zone/{ZONE}/synth/oneshot
 **合成规则**
 
 合成规则为`json`格式，`name`需设置为`rules`。 
-clips为视频片段，需要保证所有视频片段具备相同的流（编码、TimeBase），排列顺序影响合成的结果
+clips为合成规则，需要保证所有视频片段具备相同的流（编码、TimeBase），排列顺序影响合成的结果
 music为背景音乐，合成时自动循环。
 
 **视频数据**
@@ -135,10 +135,16 @@ Content-Type: application/json
   "clips": [
     {
       "name": "video_1",
-      "vfx": {
-        "code": "VFXSlowMotion",
-        "params": {"start_time":  1, "end_time":  5}
-      }
+      "vfx": [
+        {
+          "code": "VFXSlowMotion",
+          "params": {"begin_sec":  1}
+        },
+        {
+          "code": "VFXFrameFreeze",
+          "params": {"begin_sec":  1}
+        }
+      ]
     },
     {
       "name": "video_2",
@@ -186,16 +192,20 @@ music_1音频数据...
 待开发
 
 ## 特效规则
-特效在在合成接口中的rules中指定，每一个视频需要绑定一个特效vfx。
+特效在在合成接口中的rules中指定，每一个视频可以绑定多个特效。
+* name: 待处理的人物视频
+* vfx: 特效参数。如果没有vfx则会从预上传素材获取数据，如果vfx=null则代表不做特效处理
 * code: 特效的编码，用于指定使用哪种特效。
 * params: 使用该特效的参数，每个特效的参数不同。
 ```text
 {
   "name": "prelude_01",
-  "vfx": {
-    "code": "VFXSlowMotion",
-    "params": {"k1": "v1", "k2": "v2"}
-  }
+  "vfx": [
+      {
+        "code": "VFXSlowMotion",
+        "params": {"k1": "v1"}
+     }
+  ]
 }
 ```
 每个特效具体的code及参数如下
@@ -212,37 +222,39 @@ music_1音频数据...
 | -- |-----|----|-----| -- |
 | begin_sec | int | 是  | 无   | 慢放开始时间 |
 
-**取景框慢动作（VFXViewfinderSlowAction）**
-
-| 参数 | 类型  | 必选 | 默认值 | 说明 |
-| -- |-----|----|-----| -- |
-| begin_sec | int | 是  | 无   | 慢放开始时间 |
-| main_char | str   | 是  | 无   | 主角人脸图片 |
-
-
 **RGB震动（VFXRGBShake）**
 
 | 参数 | 类型  | 必选 | 默认值 | 说明 |
 | -- |-----|----|-----| -- |
 | begin_sec | int | 是  | 无   | 慢放开始时间 |
 
+**取景框慢动作（VFXViewfinderSlowAction）**
+
+| 参数 | 类型    | 必选 | 默认值 | 说明 |
+| -- |-------|----|-----| -- |
+| main_char | str   | 是  | 无   | 主角人脸图片 |
+| cosine_similar_thresh | float | 否  | 0.2 | 人脸相似度阈值 |
+
 **C位放大镜（VFXEnlargeFaces）**
 
 | 参数 | 类型    | 必选 | 默认值 | 说明     |
 | -- |-------|----|-----|--------|
 | main_char | str   | 是  | 无   | 主角人脸图片 |
+| cosine_similar_thresh | float | 否  | 0.2 | 人脸相似度阈值 |
 
 **路人虚化（VFXPassersbyBlurred）**
 
 | 参数 | 类型    | 必选 | 默认值 | 说明     |
 | -- |-------|----|-----|--------|
 | main_char | str   | 是  | 无   | 主角人脸图片 |
+| cosine_similar_thresh | float | 否  | 0.2 | 人脸相似度阈值 |
 
 **变焦（VFXPersonFollowFocus）**
 
 | 参数 | 类型    | 必选 | 默认值 | 说明     |
 | -- |-------|----|-----|--------|
 | main_char | str   | 是  | 无   | 主角人脸图片 |
+| cosine_similar_thresh | float | 否  | 0.2 | 人脸相似度阈值 |
 
 **MV封面（VFXMVCover）**
 
