@@ -2,9 +2,14 @@
 # Copyright 2020 BE-GAIA. All Rights Reserved.
 #
 # coding: utf-8
+from vfxs.config import IS_DEBUG
+
+if IS_DEBUG:
+    workers = 1
+else:
+    workers = 4
 
 bind = '0.0.0.0:8888'
-workers = 4
 worker_class = 'uvicorn.workers.UvicornWorker'
 # 请求超时时间，默认30
 timeout = 60
