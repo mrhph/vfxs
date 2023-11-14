@@ -154,7 +154,6 @@ async def synth_oneshot(zone: str, request: Request):
             loop = asyncio.get_event_loop()
             tasks = list()
             for idx, name, path, effects in use_vfx_videos:
-                effects = effects if isinstance(effects, list) else [effects]
                 for effect in effects:  # 处理人像图片为具体路径
                     if effect['code'] in MAIN_CHAR_VFX:
                         effect['params']['main_char'] = str(binary_files[effect['params']['main_char']])
