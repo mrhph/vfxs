@@ -9,7 +9,7 @@ import typing
 from pathlib import Path
 
 
-class VFXBase:
+class VFXBase(abc.ABC):
     def __init__(self, ori: typing.Union[Path, str], out: typing.Union[Path, str]):
 
         if not os.path.exists(ori):
@@ -19,7 +19,6 @@ class VFXBase:
         self.out: str = str(out)
         self.code: str = ...
         self.name: str = ...
-        self.model = None
 
     def check_params(self, params: list[tuple[str, type]], kw: dict):
         for k, t in params:
@@ -27,6 +26,12 @@ class VFXBase:
                 raise ValueError(f'{self.name}参数{k}缺失')
             if not isinstance(kw[k], t):
                 raise ValueError(f'{self.name}参数{k}类型错误, 应为{t.__name__}')
+
+    @classmethod
+    @abc.abstractmethod
+    def init_model(cls):
+        """加载模型，需要使用类方法便于在新进程里初始化"""
+        raise NotImplementedError
 
     @abc.abstractmethod
     def supplied_params(self, **kwargs) -> dict:

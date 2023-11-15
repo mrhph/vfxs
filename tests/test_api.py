@@ -140,10 +140,10 @@ def test_xmv_cover():
         "clips": [
             {
                 "name": "test_1",
-                "vfx": {
+                "vfx": [{
                     "code": "VFXMVCover",
                     "params": {"begin_sec": 1}
-                }
+                }]
             },
         ]
     }
@@ -156,10 +156,10 @@ def test_enlarge_faces():
         "clips": [
             {
                 "name": "test_1",
-                "vfx": {
+                "vfx": [{
                     "code": "VFXEnlargeFaces",
                     "params": {"main_char": 'mainchar'}
-                }
+                }]
             },
         ]
     }

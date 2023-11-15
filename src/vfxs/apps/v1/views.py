@@ -4,6 +4,7 @@
 # coding: utf-8
 import asyncio
 import json
+import os
 import pathlib
 import time
 import typing
@@ -21,10 +22,14 @@ from vfxs.utils.cos import CosStorage
 from vfxs.utils.logger import LOGGER
 from vfxs.utils.request import paras_form_content_disposition
 from vfxs.utils.response import response_200, response_400, response_500
+from vfxs.utils.wrapper import SyncToAsyncWrapper
 from vfxs.vfx import convert_video, get_vfx_handle, concat_videos, add_music_to_video
 from . import router
 
 MAIN_CHAR_VFX = ['VFXViewfinderSlowAction', 'VFXEnlargeFaces', 'VFXPassersbyBlurred', 'VFXPersonFollowFocus']
+
+
+POOL = ProcessPoolExecutor(max_workers=10)
 
 
 @router.post('/zone/{zone}/asset')
@@ -104,8 +109,14 @@ def handle_video(idx: int, ori: typing.Union[pathlib.Path, str], effects: list[d
     out = None
     LOGGER.info(f'处理{video_name}视频, 参数: {effects}')
     for effect in effects:
+        t1 = (time.time() * 1000)
+        LOGGER.info(f'处理{video_name}特效{effect["code"]}, params: {effect["params"]}')
         out = TMP_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
-        handle = get_vfx_handle(effect['code'])(ori, out)
+        cls = get_vfx_handle(effect['code'])
+        if not getattr(cls, 'model', None):
+            LOGGER.info(f'{os.getpid()}进程预加载{effect["code"]}模型')
+            cls.init_model()
+        handle = cls(ori, out)
         try:
             handle(**effect['params'])
         except Exception as e:
@@ -113,6 +124,7 @@ def handle_video(idx: int, ori: typing.Union[pathlib.Path, str], effects: list[d
             out = ori
         else:
             ori = out
+        LOGGER.info(f'处理{video_name}特效{effect["code"]}完成, 耗时: {(time.time() * 1000) - t1}ms')
     return idx, out
 
 
@@ -150,19 +162,18 @@ async def synth_oneshot(zone: str, request: Request):
     # 进行特效处理
     vfx_videos = dict()
     if use_vfx_videos:
-        with ProcessPoolExecutor(max_workers=len(use_vfx_videos)) as pool:
-            loop = asyncio.get_event_loop()
-            tasks = list()
-            for idx, name, path, effects in use_vfx_videos:
-                for effect in effects:  # 处理人像图片为具体路径
-                    if effect['code'] in MAIN_CHAR_VFX:
-                        effect['params']['main_char'] = str(binary_files[effect['params']['main_char']])
-                tasks.append(loop.run_in_executor(pool, handle_video, idx, path, effects, name))
-            try:
-                result = await asyncio.gather(*tasks)
-            except Exception as e:
-                return response_500(message=str(e))
-            vfx_videos = {i[0]: i[1] for i in result}
+        loop = asyncio.get_event_loop()
+        tasks = list()
+        for idx, name, path, effects in use_vfx_videos:
+            for effect in effects:  # 处理人像图片为具体路径
+                if effect['code'] in MAIN_CHAR_VFX:
+                    effect['params']['main_char'] = str(binary_files[effect['params']['main_char']])
+            tasks.append(loop.run_in_executor(POOL, handle_video, idx, path, effects, name))
+        try:
+            result = await asyncio.gather(*tasks)
+        except Exception as e:
+            return response_500(message=str(e))
+        vfx_videos = {i[0]: i[1] for i in result}
     # 替换需要进行特效处理的人物视频，顺序不能乱
     videos = [str(vfx_videos[idx] if effect else path) for idx, name, path, effect in videos]
 
@@ -171,12 +182,14 @@ async def synth_oneshot(zone: str, request: Request):
         video = pathlib.Path(videos[0])
     else:
         video = TMP_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
-        concat_videos(str(video), *videos)
+        SyncToAsyncWrapper(concat_videos, POOL)(str(video), *videos)
+        LOGGER.info(f'视频拼接完成')
     # 添加音乐
     if rules.get('music'):
         music = await material.get_storage_path(zone, rules['music']['name'])
         result = TMP_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
-        add_music_to_video(str(result), str(video), str(music))
+        SyncToAsyncWrapper(add_music_to_video, POOL)(str(result), str(video), str(music))
+        LOGGER.info('bgm添加完成')
     else:
         result = video
     # 上传至cos
