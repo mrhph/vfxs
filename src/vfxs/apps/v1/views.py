@@ -2,6 +2,7 @@
 # Copyright 2020 BE-GAIA. All Rights Reserved.
 #
 # coding: utf-8
+import os
 import asyncio
 import json
 import pathlib
@@ -163,6 +164,14 @@ async def synth_oneshot(zone: str, request: Request):
             except Exception as e:
                 return response_500(message=str(e))
             vfx_videos = {i[0]: i[1] for i in result}
+            
+    # CU: 做个视频是否正常生成的检查 以防视频拼接出错
+    for idx, save_video_path in vfx_videos.items():
+        is_exists = os.path.exists(save_video_path)
+        if not is_exists:
+            LOGGER.error(f"特效{videos[idx][1]}生成的视频{save_video_path}不存在, 将替换为原视频")
+            vfx_videos[idx] = videos[idx][2]
+            
     # 替换需要进行特效处理的人物视频，顺序不能乱
     videos = [str(vfx_videos[idx] if effect else path) for idx, name, path, effect in videos]
 
