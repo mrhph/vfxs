@@ -183,13 +183,17 @@ async def synth_oneshot(zone: str, request: Request):
     else:
         video = TMP_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
         SyncToAsyncWrapper(concat_videos, POOL)(str(video), *videos)
-        LOGGER.info(f'视频拼接完成')
+        if not video.exists():
+            return response_500(f'视频拼接失败, 未有结果视频生成')
+        LOGGER.info(f'视频拼接完成 to {video} ')
     # 添加音乐
     if rules.get('music'):
         music = await material.get_storage_path(zone, rules['music']['name'])
         result = TMP_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
-        SyncToAsyncWrapper(add_music_to_video, POOL)(str(result), str(video), str(music))
-        LOGGER.info('bgm添加完成')
+        SyncToAsyncWrapper(add_music_to_video, POOL)(str(video), str(music), str(result))
+        if not result.exists():
+            return response_500(f'音乐合成失败, 未有结果视频生成')
+        LOGGER.info(f'bgm添加完成 to {result}')
     else:
         result = video
     # 上传至cos

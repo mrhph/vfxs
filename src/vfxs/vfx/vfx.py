@@ -3,6 +3,7 @@
 #
 # coding: utf-8
 import abc
+import os
 import typing
 from pathlib import Path
 
@@ -224,10 +225,10 @@ def convert_video(src: str, dst: str):
     vfx4py.convert_video(src, dst)
 
 
-def concat_videos(out_path: str, *videos):
-    vfx4py.concat_videos(videos, out_path)
+def concat_videos(out_video: str, *videos):
+    vfx4py.concat_videos(videos, out_video)
 
 
-def add_music_to_video(out_path: str, video_path: str, music_path: str):
-    vfx4py.add_music_to_video(video_path, music_path, out_path)
+def add_music_to_video(ori_video: str, music_path: str, out_video: str):
+    vfx4py.add_music_to_video(ori_video, music_path, out_video)
 
