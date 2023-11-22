@@ -5,7 +5,7 @@
 from vfxs.config import IS_DEBUG
 
 
-workers = 1 if IS_DEBUG else 4
+workers = 1 if IS_DEBUG else 2
 
 bind = '0.0.0.0:8888'
 worker_class = 'vfxs.server.UvicornWorker'

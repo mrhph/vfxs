@@ -3,7 +3,6 @@
 #
 # coding: utf-8
 import abc
-import os
 import typing
 from pathlib import Path
 
@@ -23,7 +22,8 @@ __all__ = [
     'VFXMVCover',
     'concat_videos',
     'add_music_to_video',
-    'convert_video'
+    'convert_video',
+    'change_video_profile'
 ]
 
 
@@ -221,14 +221,21 @@ class VFXMVCover(VFXBase):
         self.model.handle_video(self.ori, self.out, begin_sec)
 
 
-def convert_video(src: str, dst: str):
-    vfx4py.convert_video(src, dst)
+def convert_video(ori: str, out: str):
+    """视频格式转换"""
+    vfx4py.convert_video(ori, out)
 
 
-def concat_videos(out_video: str, *videos):
-    vfx4py.concat_videos(videos, out_video)
+def concat_videos(out: str, *videos):
+    """拼接视频"""
+    vfx4py.concat_videos(videos, out)
 
 
-def add_music_to_video(ori_video: str, music_path: str, out_video: str):
-    vfx4py.add_music_to_video(ori_video, music_path, out_video)
+def add_music_to_video(ori: str, music: str, out: str):
+    """添加bgm"""
+    vfx4py.add_music_to_video(ori, music, out)
 
+
+def change_video_profile(ori: str, out: str):
+    """格式转换，针对多特效视频"""
+    vfx4py.change_video_profile(ori, out)

@@ -23,13 +23,22 @@ from vfxs.utils.logger import LOGGER
 from vfxs.utils.request import paras_form_content_disposition
 from vfxs.utils.response import response_200, response_400, response_500
 from vfxs.utils.wrapper import SyncToAsyncWrapper
-from vfxs.vfx import convert_video, get_vfx_handle, concat_videos, add_music_to_video
+from vfxs.vfx import convert_video, get_vfx_handle, concat_videos, add_music_to_video, VFX_MAP, change_video_profile
 from . import router
 
 MAIN_CHAR_VFX = ['VFXViewfinderSlowAction', 'VFXEnlargeFaces', 'VFXPassersbyBlurred', 'VFXPersonFollowFocus']
 
 
-POOL = ProcessPoolExecutor(max_workers=10)
+def init_all_model():
+    for k, v in VFX_MAP.items():
+        LOGGER.info(f'{os.getpid()}进程预加载{k}模型')
+        v.init_model()
+
+
+# 处理特效的进程池，需要预先加载engine模型所以会占用显存，不能设置大
+POOL_VFX_EFFECT = ProcessPoolExecutor(max_workers=2)
+# 不需要加载模型的进程池，用来处理合并、bgm等
+POOL_VFX = ProcessPoolExecutor(max_workers=4)
 
 
 @router.post('/zone/{zone}/asset')
@@ -105,10 +114,10 @@ async def get_asset(zone: str, bt: str = 'pretreatment'):
     return response_200(response)
 
 
-def handle_video(idx: int, ori: typing.Union[pathlib.Path, str], effects: list[dict], video_name: str):
+def handle_video(key: int, ori: typing.Union[pathlib.Path, str], effects: list[dict], video_name: str):
     out = None
     LOGGER.info(f'处理{video_name}视频, 参数: {effects}')
-    for effect in effects:
+    for idx, effect in enumerate(effects):
         t1 = (time.time() * 1000)
         LOGGER.info(f'处理{video_name}特效{effect["code"]}, params: {effect["params"]}')
         out = TMP_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
@@ -124,8 +133,13 @@ def handle_video(idx: int, ori: typing.Union[pathlib.Path, str], effects: list[d
             out = ori
         else:
             ori = out
+            # 多特效视频对中间视频结果进行profile设置
+            if idx + 1 < len(effects):
+                out = TMP_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
+                change_video_profile(str(ori), str(out))
+                ori = out
         LOGGER.info(f'处理{video_name}特效{effect["code"]}完成, 耗时: {(time.time() * 1000) - t1}ms')
-    return idx, out
+    return key, out
 
 
 @router.post('/zone/{zone}/synth/oneshot')
@@ -168,7 +182,7 @@ async def synth_oneshot(zone: str, request: Request):
             for effect in effects:  # 处理人像图片为具体路径
                 if effect['code'] in MAIN_CHAR_VFX:
                     effect['params']['main_char'] = str(binary_files[effect['params']['main_char']])
-            tasks.append(loop.run_in_executor(POOL, handle_video, idx, path, effects, name))
+            tasks.append(loop.run_in_executor(POOL_VFX_EFFECT, handle_video, idx, path, effects, name))
         try:
             result = await asyncio.gather(*tasks)
         except Exception as e:
@@ -182,7 +196,8 @@ async def synth_oneshot(zone: str, request: Request):
         video = pathlib.Path(videos[0])
     else:
         video = TMP_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
-        SyncToAsyncWrapper(concat_videos, POOL)(str(video), *videos)
+        func = SyncToAsyncWrapper(concat_videos, POOL_VFX)
+        await func(str(video), *videos)
         if not video.exists():
             return response_500(f'视频拼接失败, 未有结果视频生成')
         LOGGER.info(f'视频拼接完成 to {video} ')
@@ -190,7 +205,8 @@ async def synth_oneshot(zone: str, request: Request):
     if rules.get('music'):
         music = await material.get_storage_path(zone, rules['music']['name'])
         result = TMP_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
-        SyncToAsyncWrapper(add_music_to_video, POOL)(str(video), str(music), str(result))
+        func = SyncToAsyncWrapper(add_music_to_video, POOL_VFX)
+        await func(str(video), str(music), str(result))
         if not result.exists():
             return response_500(f'音乐合成失败, 未有结果视频生成')
         LOGGER.info(f'bgm添加完成 to {result}')
