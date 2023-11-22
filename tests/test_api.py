@@ -225,10 +225,16 @@ def test_all_video_with_music():
         "clips": [
             {
                 "name": "test_1",
-                "vfx": [{
-                    "code": "VFXFrameFreeze",
-                    "params": {"begin_sec": 1}
-                }]
+                "vfx": [
+                    {
+                        "code": "VFXFrameFreeze",
+                        "params": {"begin_sec": 1}
+                    },
+                    {
+                        "code": "VFXEnlargeFaces",
+                        "params": {"main_char": 'mainchar'}
+                    }
+                ]
             },
             {
                 "name": "test_2"
