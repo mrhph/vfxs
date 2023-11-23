@@ -37,6 +37,10 @@ class CosStorage:
         )
         return CosUploadResult(key, response['Bucket'], response['Location'], response['ETag'])
 
+    @staticmethod
+    def get_object_url(key: str) -> str:
+        return COS_CLIENT.get_object_url(COS_BUCKET_NAME, key)
+
 
 
 

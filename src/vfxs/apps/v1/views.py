@@ -214,9 +214,9 @@ async def synth_oneshot(zone: str, request: Request):
         result = video
     # 上传至cos
     upload_ret = CosStorage.upload_file(str(result), result.name)
+    url = CosStorage.get_object_url(result.name)
     response = {
-        'cos': {'Bucket': upload_ret.Bucket, 'Key': upload_ret.Key, 'Location': upload_ret.Location},
-        'path': str(result)
+        'cos': {'Bucket': upload_ret.Bucket, 'Key': upload_ret.Key, 'Location': url}
     }
     return response_200(response)
 
