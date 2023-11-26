@@ -24,8 +24,12 @@ class VFXBase(abc.ABC):
         for k, t in params:
             if k not in kw:
                 raise ValueError(f'{self.name}参数{k}缺失')
-            if not isinstance(kw[k], t):
-                raise ValueError(f'{self.name}参数{k}类型错误, 应为{t.__name__}')
+            if t == float:
+                if not isinstance(kw[k], (float, int)):
+                    raise ValueError(f'{self.name}参数{k}类型错误, 应为{t.__name__}')
+            else:
+                if not isinstance(kw[k], t):
+                    raise ValueError(f'{self.name}参数{k}类型错误, 应为{t.__name__}')
 
     @classmethod
     @abc.abstractmethod

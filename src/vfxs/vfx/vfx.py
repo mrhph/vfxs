@@ -46,13 +46,13 @@ class VFXFrameFreeze(VFXBase):
         self.name = '画框定格'
 
     def supplied_params(self, **kwargs):
-        params = [('begin_sec', int)]
+        params = [('begin_sec', float)]
         self.check_params(params, kwargs)
         return {
             'begin_sec': kwargs['begin_sec']
         }
 
-    def dispose_of(self, begin_sec: int, *args, **kwargs):
+    def dispose_of(self, begin_sec: float, *args, **kwargs):
         self.model.handle_video(self.ori, self.out, begin_sec)
 
 
@@ -68,13 +68,13 @@ class VFXSlowMotion(VFXBase):
         self.name = '慢动作'
 
     def supplied_params(self, **kwargs):
-        params = [('begin_sec', int)]
+        params = [('begin_sec', float)]
         self.check_params(params, kwargs)
         return {
             'begin_sec': kwargs['begin_sec']
         }
 
-    def dispose_of(self, begin_sec: int, *args, **kwargs):
+    def dispose_of(self, begin_sec: float, *args, **kwargs):
         self.model.handle_video(self.ori, self.out, begin_sec)
 
 
@@ -90,13 +90,13 @@ class VFXRGBShake(VFXBase):
         self.name = 'RGB震动'
 
     def supplied_params(self, **kwargs) -> dict:
-        params = [('begin_sec', int)]
+        params = [('begin_sec', float)]
         self.check_params(params, kwargs)
         return {
             'begin_sec': kwargs['begin_sec'],
         }
 
-    def dispose_of(self, begin_sec: int, *args, **kwargs):
+    def dispose_of(self, begin_sec: float, *args, **kwargs):
         self.model.handle_video(self.ori, self.out, begin_sec)
 
 
@@ -211,13 +211,13 @@ class VFXMVCover(VFXBase):
         self.name = 'MV封面'
 
     def supplied_params(self, **kwargs) -> dict:
-        params = [('begin_sec', int)]
+        params = [('begin_sec', float)]
         self.check_params(params, kwargs)
         return {
             'begin_sec': kwargs['begin_sec']
         }
 
-    def dispose_of(self, begin_sec: int, *args, **kwargs):
+    def dispose_of(self, begin_sec: float, *args, **kwargs):
         self.model.handle_video(self.ori, self.out, begin_sec)
 
 

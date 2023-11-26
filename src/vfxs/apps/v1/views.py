@@ -35,8 +35,8 @@ def init_all_model():
         v.init_model()
 
 
-# 处理特效的进程池，需要预先加载engine模型所以会占用显存，不能设置大
-POOL_VFX_EFFECT = ProcessPoolExecutor(max_workers=2)
+# 处理特效的进程池，需要预先加载engine模型所以会占用显存，不能设置大，一个景区一般是有3个视频片段做处理
+POOL_VFX_EFFECT = ProcessPoolExecutor(max_workers=3)
 # 不需要加载模型的进程池，用来处理合并、bgm等
 POOL_VFX = ProcessPoolExecutor(max_workers=4)
 
