@@ -1,6 +1,6 @@
 # 视频特效平台
 
-版本：`1.0`
+版本：`v1.0`
 
 环境信息：
 * python3.10.12
@@ -29,7 +29,7 @@
 ### 文件上传
 文件上传接口，主要用于提前将素材上传到合成服务器，避免后续合成任务每次上传重复文件数据。
 ```text
-POST /1.0/zone/{ZONE}/asset HTTP/1.1
+POST /v1.0/zone/{ZONE}/asset HTTP/1.1
 ```
 *ZONE 为景区标识符，由调用方确保唯一，注意不要包含特殊字符，以免产生未知错误。如无特殊说明，其它接口ZONE均参考此说明*。
 
@@ -40,7 +40,7 @@ POST /1.0/zone/{ZONE}/asset HTTP/1.1
 **请求示例**
 
 ```text
-POST /1.0/zone/{ZONE}/synth/oneshot HTTP/1.1
+POST /v1.0/zone/{ZONE}/synth/oneshot HTTP/1.1
 Content-Length: 10000
 Content-Type: multipart/form-data; boundary=${Boundary}
 
@@ -82,7 +82,7 @@ camera_01视频数据...
 文件列表接口，列出服务器中已预先上传的文件信息。
 文件上传接口，主要用于提前将素材上传到合成服务器，避免后续合成任务每次上传重复文件数据。
 ```text
-GET /1.0/zone/{ZONE}/asset
+GET /v1.0/zone/{ZONE}/asset
 ```
 
 **响应**
@@ -107,7 +107,7 @@ GET /1.0/zone/{ZONE}/asset
 
 同步合成接口，返回时则表示合成完毕。合成服务会配置同步合成任务的数量，同步请求有可能响应时间较慢导致超时，可考虑使用`异步合成`接口。
 ```
-POST /1.0/zone/{ZONE}/synth/oneshot
+POST /v1.0/zone/{ZONE}/synth/oneshot
 ```
 请求内容包含两部分：合成规则以及视频数据。请求头部使用`Content-Type: multipart/form-data; boundary=XXXX`进行数据上传。
 
@@ -123,7 +123,7 @@ music为背景音乐，合成时自动循环。
 
 **请求示例**
 ```text
-POST /1.0/zone/aly/synth/oneshot HTTP/1.1
+POST /v1.0/zone/aly/synth/oneshot HTTP/1.1
 Content-Length: 10000
 Content-Type: multipart/form-data; boundary=${Boundary}
 
