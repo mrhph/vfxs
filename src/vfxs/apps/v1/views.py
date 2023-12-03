@@ -20,7 +20,6 @@ from vfxs.config import TMP_DIR, MATERIAL_DIR
 from vfxs.models import database, material
 from vfxs.utils.cos import CosStorage
 from vfxs.utils.logger import LOGGER
-from vfxs.utils.request import paras_form_content_disposition
 from vfxs.utils.response import response_200, response_400, response_500
 from vfxs.utils.wrapper import SyncToAsyncWrapper
 from vfxs.vfx import convert_video, get_vfx_handle, concat_videos, add_music_to_video, VFX_MAP, change_video_profile
@@ -46,11 +45,10 @@ async def asset_upload(zone: str, request: Request):
     form = await request.form()
     response = list()
     MATERIAL_DIR.joinpath(zone).mkdir(parents=True, exist_ok=True)
-    for k, file in form.items():
+    for name, file in form.items():
         if not isinstance(file, StarletteUploadFile):
             continue
         ft = file.filename.rsplit('.', 1)[-1]  # 文件类型
-        name = paras_form_content_disposition(file.headers['content-disposition'])['name']  # name
         if ft == 'aac':  # 音频数据
             bt = 'bgm'
             path = MATERIAL_DIR.joinpath(f'{zone}/{name}.{ft}')
@@ -147,12 +145,11 @@ async def synth_oneshot(zone: str, request: Request):
     form = await request.form()
     rules, binary_files = dict(), dict()
     # 提取合成规则及二进制数据，数据存入tmp下
-    for k, item in form.items():
-        if k == 'rules':
+    for name, item in form.items():
+        if name == 'rules':
             rules = json.loads(item)
         if isinstance(item, StarletteUploadFile):
             filename = item.filename
-            name = paras_form_content_disposition(item.headers['content-disposition'])['name']  # name
             path = TMP_DIR.joinpath(filename)
             async with aiofiles.open(path, 'wb') as f:
                 await f.write(await item.read())

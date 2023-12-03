@@ -6,8 +6,8 @@ import json
 import requests
 
 
-HOST = 'http://118.195.171.96:8888'
-# HOST = 'http://127.0.0.1:8000'
+# HOST = 'http://118.195.171.96:8888'
+HOST = 'http://127.0.0.1:8000'
 
 
 def test_asset_upload():
@@ -15,25 +15,24 @@ def test_asset_upload():
     payload = {'rules': json.dumps({'a': 123})}
     files = [
         (
-            'test_2',
+            '测试',
+            (
+                '测试.mp4',
+                open('./data/测试.mp4', 'rb'),
+                'application/octet-stream',
+            )
+        ),
+        (
+            'test',
             (
                 'test_1.mp4',
                 open('./data/test_1.mp4', 'rb'),
                 'application/octet-stream',
             )
-        ),
-        (
-            'bgm',
-            (
-                'bgm.aac',
-                open('./data/bgm.aac', 'rb'),
-                'application/octet-stream',
-            )
         )
-
     ]
     headers = {}
-    response = requests.post(url, headers=headers, data=payload, files=files)
+    response = requests.post(url, headers=headers, files=files, data=payload)
     print(response.status_code)
     print(response.text)
 
