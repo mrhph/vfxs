@@ -106,7 +106,7 @@ async def get_asset(zone: str, bt: str = 'pretreatment'):
         return response_400(message=f'暂不支持非{bt}类型文件查询')
     sql = sa.select(
         material.c.name, material.c.storage
-    ).where(material.c.zone == zone, material.c.bt == bt)
+    ).where(material.c.zone == zone)
     data = await database.fetch_all(sql)
     response = [{'name': i.name, 'size': i.storage['info']['size']} for i in data]
     return response_200(response)

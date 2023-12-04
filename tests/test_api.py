@@ -6,8 +6,8 @@ import json
 import requests
 
 
-# HOST = 'http://118.195.171.96:8888'
-HOST = 'http://127.0.0.1:8000'
+HOST = 'http://118.195.171.96:8888'
+# HOST = 'http://127.0.0.1:8000'
 
 
 def test_asset_upload():
@@ -75,10 +75,12 @@ def test_frame_freeze():
         "clips": [
             {
                 "name": "test_1",
-                "vfx": {
-                    "code": "VFXFrameFreeze",
-                    "params": {"begin_sec": 1}
-                }
+                "vfx": [
+                    {
+                        "code": "VFXFrameFreeze",
+                        "params": {"begin_sec": 1}
+                    }
+                ]
             }
         ]
     }
@@ -91,10 +93,12 @@ def test_slow_motion():
         "clips": [
             {
                 "name": "test_1",
-                "vfx": {
-                    "code": "VFXSlowMotion",
-                    "params": {"begin_sec": 1, "end_sec": 5}
-                }
+                "vfx": [
+                    {
+                        "code": "VFXSlowMotion",
+                        "params": {"begin_sec": 1, "end_sec": 5}
+                    }
+                ]
             }
         ]
     }
@@ -107,10 +111,12 @@ def test_viewfinder_slow_action():
         "clips": [
             {
                 "name": "test_1",
-                "vfx": {
-                    "code": "VFXViewfinderSlowAction",
-                    "params": {"begin_sec": 1, "end_sec": 5}
-                }
+                "vfx": [
+                    {
+                        "code": "VFXViewfinderSlowAction",
+                        "params": {"begin_sec": 1, "end_sec": 5}
+                    }
+                ]
             },
         ]
     }
@@ -123,10 +129,12 @@ def test_rgb_shake():
         "clips": [
             {
                 "name": "test_1",
-                "vfx": {
-                    "code": "VFXRGBShake",
-                    "params": {"begin_sec": 1, "end_sec": 5}
-                }
+                "vfx": [
+                    {
+                        "code": "VFXRGBShake",
+                        "params": {"begin_sec": 1, "end_sec": 5}
+                    }
+                ]
             },
         ]
     }
@@ -139,10 +147,12 @@ def test_xmv_cover():
         "clips": [
             {
                 "name": "test_1",
-                "vfx": [{
-                    "code": "VFXMVCover",
-                    "params": {"begin_sec": 1}
-                }]
+                "vfx": [
+                    {
+                        "code": "VFXMVCover",
+                        "params": {"begin_sec": 1}
+                    }
+                ]
             },
         ]
     }
@@ -155,10 +165,12 @@ def test_enlarge_faces():
         "clips": [
             {
                 "name": "test_1",
-                "vfx": [{
-                    "code": "VFXEnlargeFaces",
-                    "params": {"main_char": 'mainchar'}
-                }]
+                "vfx": [
+                    {
+                        "code": "VFXEnlargeFaces",
+                        "params": {"main_char": 'mainchar'}
+                    }
+                ]
             },
         ]
     }
@@ -171,10 +183,12 @@ def test_passersby_blurred():
         "clips": [
             {
                 "name": "test_1",
-                "vfx": {
-                    "code": "VFXPassersbyBlurred",
-                    "params": {"main_char": 'mainchar'}
-                }
+                "vfx": [
+                    {
+                        "code": "VFXPassersbyBlurred",
+                        "params": {"main_char": 'mainchar'}
+                    }
+                ]
             },
         ]
     }
@@ -187,10 +201,12 @@ def test_person_follow_focus():
         "clips": [
             {
                 "name": "test_1",
-                "vfx": {
-                    "code": "VFXPersonFollowFocus",
-                    "params": {"main_char": 'mainchar'}
-                }
+                "vfx": [
+                    {
+                        "code": "VFXPersonFollowFocus",
+                        "params": {"main_char": 'mainchar'}
+                    }
+                ]
             },
         ]
     }
@@ -202,17 +218,21 @@ def test_all_video():
         "clips": [
             {
                 "name": "test_1",
-                "vfx": {
-                    "code": "VFXFrameFreeze",
-                    "params": {"begin_sec": 1}
-                }
+                "vfx": [
+                    {
+                        "code": "VFXFrameFreeze",
+                        "params": {"begin_sec": 1}
+                    }
+                ]
             },
             {
                 "name": "test_1",
-                "vfx": {
-                    "code": "VFXEnlargeFaces",
-                    "params": {"main_char": 'mainchar'}
-                }
+                "vfx": [
+                    {
+                        "code": "VFXEnlargeFaces",
+                        "params": {"main_char": 'mainchar'}
+                    }
+                ]
             },
         ]
     }
