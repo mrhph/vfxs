@@ -41,7 +41,7 @@ POOL_VFX = ProcessPoolExecutor(max_workers=4)
 
 
 @router.post('/zone/{zone}/asset')
-async def asset_upload(zone: str, request: Request):
+async def asset_upload(zone: str, client_id: str, request: Request):
     form = await request.form()
     response = list()
     MATERIAL_DIR.joinpath(zone).mkdir(parents=True, exist_ok=True)
@@ -66,7 +66,9 @@ async def asset_upload(zone: str, request: Request):
             'type': 'systemFile',
             'info': {'path': str(path), 'size': file.size, 'ft': ft}
         }
-        sql = sa.select(material.c.id).where(material.c.zone == zone, material.c.name == name)
+        sql = sa.select(material.c.id).where(
+            material.c.client_id == client_id, material.c.zone == zone, material.c.name == name
+        )
         data = await database.fetch_one(sql)
         current_time = int(time.time() * 1000)
         if data:
@@ -82,6 +84,7 @@ async def asset_upload(zone: str, request: Request):
             await database.execute(sql)
         else:
             record = {
+                'client_id': client_id,
                 'name': name,
                 'filename': file.filename,
                 'ft': file.filename.rsplit('.', 1)[-1],
@@ -101,12 +104,10 @@ async def asset_upload(zone: str, request: Request):
 
 
 @router.get('/zone/{zone}/asset')
-async def get_asset(zone: str, bt: str = 'pretreatment'):
-    if bt != 'pretreatment':
-        return response_400(message=f'暂不支持非{bt}类型文件查询')
+async def get_asset(zone: str, client_id: str):
     sql = sa.select(
         material.c.name, material.c.storage
-    ).where(material.c.zone == zone)
+    ).where(material.c.client_id == client_id, material.c.zone == zone)
     data = await database.fetch_all(sql)
     response = [{'name': i.name, 'size': i.storage['info']['size']} for i in data]
     return response_200(response)
@@ -141,7 +142,7 @@ def handle_video(key: int, ori: typing.Union[pathlib.Path, str], effects: list[d
 
 
 @router.post('/zone/{zone}/synth/oneshot')
-async def synth_oneshot(zone: str, request: Request):
+async def synth_oneshot(zone: str, client_id: str, request: Request):
     form = await request.form()
     rules, binary_files = dict(), dict()
     # 提取合成规则及二进制数据，数据存入tmp下
@@ -163,7 +164,7 @@ async def synth_oneshot(zone: str, request: Request):
     videos, use_vfx_videos = list(), list()
     for idx, clip in enumerate(rules['clips']):
         name = clip['name']
-        path = binary_files.get(name) if 'vfx' in clip else await material.get_storage_path(zone, name)
+        path = binary_files.get(name) if 'vfx' in clip else await material.get_storage_path(client_id, zone, name)
         if clip.get('vfx'):
             use_vfx_videos.append((idx, name, path, clip['vfx']))
         if not path:

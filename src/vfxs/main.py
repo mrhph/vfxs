@@ -6,10 +6,10 @@ import logging
 import traceback
 from importlib.metadata import entry_points
 
-from fastapi import FastAPI, Request
-from fastapi.exceptions import HTTPException
+from fastapi import FastAPI, Request, Depends
+from fastapi.exceptions import HTTPException, RequestValidationError
 
-from vfxs.config import DATA_DIR, LOG_DIR, TMP_DIR, MATERIAL_DIR, SERVER_PORT
+from vfxs.config import DATA_DIR, LOG_DIR, TMP_DIR, MATERIAL_DIR, SERVER_PORT, CLIENT_WHITE_LIST
 from vfxs.models.database import database
 from vfxs.server import UVICORN_LOGGING_CONFIG
 from vfxs.utils.enums import ResponseCode
@@ -36,6 +36,11 @@ async def app_shutdown():
     await database.disconnect()
 
 
+async def verify_client_id(request: Request, client_id: str = None):
+    if request.url.path != '/' and client_id not in CLIENT_WHITE_LIST:
+        raise HTTPException(400, 'client_id非法')
+
+
 async def exception_handler(request: Request, exc):
     message = str(getattr(exc, 'detail', exc))
     status_code = getattr(exc, 'status_code', 500)
@@ -51,7 +56,7 @@ async def status_code_handler(request: Request, exc):
 
 
 def get_app():
-    app = FastAPI()
+    app = FastAPI(dependencies=[Depends(verify_client_id)])
 
     @app.get('/')
     def index():
@@ -60,6 +65,7 @@ def get_app():
     load_modules(app)
     app.add_exception_handler(HTTPException, exception_handler)
     app.add_exception_handler(Exception, exception_handler)
+    app.add_exception_handler(RequestValidationError, exception_handler)
     app.add_exception_handler(404, status_code_handler)
     app.add_exception_handler(405, status_code_handler)
     app.add_event_handler('startup', app_startup)

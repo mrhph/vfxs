@@ -17,6 +17,7 @@ material = sa.Table(
     'material',
     metadata,
     sa.Column('id', sa.Integer, primary_key=True, unique=True, comment='主键'),
+    sa.Column('client_id', sa.String(100), nullable=False, comment='客户端'),
     sa.Column('name', sa.String(200), nullable=False, comment='name'),
     sa.Column('filename', sa.String(255), nullable=False, comment='文件名'),
     sa.Column('ft', sa.String(50), nullable=False, comment='文件类型'),
@@ -31,9 +32,9 @@ material = sa.Table(
 )
 
 
-async def get_storage_path(zone: str, name: str) -> typing.Union[str, None]:
+async def get_storage_path(client_id: str, zone: str, name: str) -> typing.Union[str, None]:
     sql = sa.select(material.c.storage).where(
-        material.c.zone == zone, material.c.name == name
+        material.c.client_id == client_id, material.c.zone == zone, material.c.name == name
     )
     data = await database.fetch_one(sql)
     if not data:

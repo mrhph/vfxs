@@ -22,6 +22,9 @@ DB_DATABASE = config('DB_DATABASE', default=None)
 DB_DRIVER = config('DB_DRIVER', default='mysql')
 ASSET_EXPIRE_TIME = config('ASSET_EXPIRE_TIME_SECOND', cast=int, default=172800)
 
+# client_id白名单
+CLIENT_WHITE_LIST = set(config('CLIENT_WHITE_LIST', cast=str, default='').split(','))
+
 # 路径信息
 DATA_DIR = pathlib.Path(config('DATA_DIR', default=BASE_PATH.joinpath('data')))
 LOG_DIR = pathlib.Path(config('LOG_DIR', default=BASE_PATH.joinpath('logs')))
