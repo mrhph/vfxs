@@ -201,7 +201,7 @@ async def synth_oneshot(zone: str, client_id: str, request: Request):
         LOGGER.info(f'视频拼接完成 to {video} ')
     # 添加音乐
     if rules.get('music'):
-        music = await material.get_storage_path(zone, rules['music']['name'])
+        music = await material.get_storage_path(client_id, zone, rules['music']['name'])
         result = TMP_DIR.joinpath(f'{uuid.uuid4().hex}.mp4')
         func = SyncToAsyncWrapper(add_music_to_video, POOL_VFX)
         await func(str(video), str(music), str(result))

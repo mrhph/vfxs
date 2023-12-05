@@ -11,19 +11,11 @@ HOST = 'http://118.195.171.96:8888'
 
 
 def test_asset_upload():
-    url = f"{HOST}/v1.0/zone/aaa/asset"
+    url = f"{HOST}/v1.0/zone/aaa/asset?client_id=vfxs-test"
     payload = {'rules': json.dumps({'a': 123})}
     files = [
         (
-            '测试',
-            (
-                '测试.mp4',
-                open('./data/测试.mp4', 'rb'),
-                'application/octet-stream',
-            )
-        ),
-        (
-            'test',
+            'test3',
             (
                 'test_1.mp4',
                 open('./data/test_1.mp4', 'rb'),
@@ -38,13 +30,13 @@ def test_asset_upload():
 
 
 def test_asset_list():
-    url = f"{HOST}/v1.0/zone/aaa/asset"
+    url = f"{HOST}/v1.0/zone/aaa/asset?client_id=vfxs-test"
     response = requests.get(url)
     print(response.json())
 
 
 def synth_oneshot(rules):
-    url = f"{HOST}/v1.0/zone/aaa/synth/oneshot"
+    url = f"{HOST}/v1.0/zone/aaa/synth/oneshot?client_id=vfxs-test"
     payload = {'rules': json.dumps(rules)}
     files = [
         (
